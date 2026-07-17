@@ -11,18 +11,19 @@ struct TaskView: View {
     
     @State private var isSheetPresented = false
     var taskViewModel : TaskViewModel
+    var weatherViewModel : WeatherViewModel
     
     var body: some View {
         
         NavigationStack{
             VStack(alignment: .leading){
                 
-                WeatherTray().frame(alignment: .topLeading).padding(.leading, 6).padding(.top, 5)
+                WeatherTray(viewModel: weatherViewModel).frame(alignment: .topLeading).padding(.leading, 6).padding(.top, 5)
                 
                 Text("What's the gameplan today?").frame(maxWidth:.infinity,alignment: .leading).font(.headline).padding(.top, 10).padding(.leading,15)
                 
                 
-                TasksContainer()
+                TasksContainer(viewModel: taskViewModel)
                 
                 HStack(){
                     Spacer()
@@ -68,5 +69,5 @@ struct TaskView: View {
 
 
 #Preview {
-//    TaskView()
+    TaskView(taskViewModel: TaskViewModel(), weatherViewModel: WeatherViewModel())
 }

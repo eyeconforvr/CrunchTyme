@@ -31,7 +31,7 @@ struct TaskTypeSelector: View {
             
         }
         .pickerStyle(SegmentedPickerStyle())
-        .padding(5)
+        .padding(.leading, 5).padding(.trailing, 5)
         
             }
 }

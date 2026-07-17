@@ -12,13 +12,14 @@ private enum APIKEY {
     static let key = "0ba33315517d4c50b2461546261407" // put this in the info.plist
 }
 
-class WeatherService {
+
+class WeatherService:  WeatherServiceProtocol{
 
     
     private let baseURL = "https://api.openweathermap.org/data/2.5/weather"
     
     func getWeather(for city: String) async throws -> WeatherResponse {
-        guard let url = URL(string: "http://api.weatherapi.com/v1/current.json?key=0ba33315517d4c50b2461546261407&q=London&aqi=no") else {
+        guard let url = URL(string: "http://api.weatherapi.com/v1/forecast.json?key=0ba33315517d4c50b2461546261407&q=London&days=1&aqi=no&alerts=no") else {
             fatalError("Invalid URL")
         }
         

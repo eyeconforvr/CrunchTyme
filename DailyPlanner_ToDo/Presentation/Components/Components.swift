@@ -15,13 +15,25 @@ struct Components: View {
 
 struct WeatherTray : View
 {
+     var viewModel : WeatherViewModel
+
+    
+//    init(viewModel: WeatherViewModel, body: some View) {
+//        self.viewModel = viewModel
+//            
+//    }
+
+    
     var body : some View
     {
+        
+//        todaysWeather = "\(viewModel.$currentTemp)/°C"
+    
         Grid()
         {
             GridRow()
             {
-                Text("Today's Weather")
+                Text("\(viewModel.currentTemp)°C")
                 
                 VStack
                 {
@@ -50,5 +62,5 @@ struct WeatherTray : View
 
 
 #Preview {
-    WeatherTray()
+//    WeatherTray()
 }

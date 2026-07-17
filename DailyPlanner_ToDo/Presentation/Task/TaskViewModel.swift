@@ -10,30 +10,24 @@ import SwiftData
 import UIKit
 import SwiftUI
 
+@Observable
 class TaskViewModel {
-    
-//    @Query var tasks: [Task]
-    
-    private let context: ModelContext
 
-        init(context: ModelContext) {
-            self.context = context
-        }
+
     
-    
-    // Read all tasks
-    @Query private var tasks : [Task]
-    
-    func readTask() -> [Task]
-    {
-        return tasks
-    }
+//    // Read all tasks
+//    @Query private var tasks : [Task]
+//    
+//    func readTask() -> [Task]
+//    {
+//        return tasks
+//    }
     
     
     
     // Create Tasks
     
-    func addTask(title: String, description: String, dueDate: Date)
+    func addTask(title: String, description: String, dueDate: Date, context : ModelContext)
     {
         // create task
         
@@ -47,7 +41,7 @@ class TaskViewModel {
     
     // Delete task
     
-    func deleteTask(_ task: Task)
+    func deleteTask(_ task: Task , context : ModelContext)
     {
         context.delete(task)
     }
@@ -55,7 +49,7 @@ class TaskViewModel {
     
     // Update Task
     
-    func updateTask(_ task: Task, title: String, description: String, dueDate: Date)
+    func updateTask(_ task: Task, title: String, description: String, dueDate: Date, context : ModelContext)
     {
         task.title = title
         task.taskdescription = description

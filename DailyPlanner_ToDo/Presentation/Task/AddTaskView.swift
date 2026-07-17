@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+import SwiftData
 
 
 struct AddTaskView: View {
@@ -16,7 +16,8 @@ struct AddTaskView: View {
     @State private var taskname: String = ""
     @State private var taskdescription: String = ""
     
-    var taskViewModel  = TaskViewModel()
+    @Environment(\.modelContext) private var context
+        @State private var viewModel = TaskViewModel()
     
     
     var body: some View {
@@ -65,7 +66,7 @@ struct AddTaskView: View {
                 HStack(alignment: .center){
                     
                     Button(action: {
-                        taskViewModel.addTask(title: taskname, description: taskdescription, dueDate: date)
+                        viewModel.addTask(title: taskname, description: taskdescription, dueDate: date, context: context)
                         dismiss()
                         
                     } ,

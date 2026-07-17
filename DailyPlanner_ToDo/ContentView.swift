@@ -10,9 +10,10 @@ import SwiftUI
 struct ContentView: View
 {
     var taskViewModel = TaskViewModel()
+    var weatherViewModel = WeatherViewModel()
     var body: some View {
         
-        TaskView(taskViewModel: taskViewModel)
+        TaskView(taskViewModel: taskViewModel, weatherViewModel: weatherViewModel)
     }
 }
 
