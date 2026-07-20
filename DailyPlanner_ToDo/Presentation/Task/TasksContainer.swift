@@ -11,8 +11,25 @@ import SwiftData
 struct TasksContainer: View {
     
     @Environment(\.modelContext) private var context
+    @State var taskselection: TaskSelectionSection = .toDo
     
     @Query private var tasks: [Task]
+    
+    var filteredTasks: [Task] {
+        tasks.filter { task in
+            switch taskselection {
+            case .toDo:
+                return !task.isCompleted
+            case .completed:
+                return task.isCompleted
+            case .today:
+                return Calendar.current.isDateInToday(task.dueDate)
+            case .upcoming:
+                return (task.dueDate > Date.now) && (!task.isCompleted)
+            }
+        }
+    }
+
     var viewModel : TaskViewModel
     
     var body: some View {
@@ -27,11 +44,15 @@ struct TasksContainer: View {
                 .font(Font.title.bold())
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            TaskTypeSelector()
+            TaskTypeSelector{ selection in
+                 taskselection = selection
+                
+            }
+            
             
             List{
                 
-                ForEach(tasks){ task in
+                ForEach(filteredTasks){ task in
                     
                     TaskItem(task: task){ task in
                         task.isCompleted.toggle()
@@ -50,7 +71,6 @@ struct TasksContainer: View {
                 .alignmentGuide(.listRowSeparatorLeading) { d in
                                    return 0
                                }
-                               // Pulls the trailing edge of the separator all the way to the right
                                .alignmentGuide(.listRowSeparatorTrailing) { d in
                                    return d[.trailing]
                                }

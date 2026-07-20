@@ -18,11 +18,12 @@ enum TaskSelectionSection: String, CaseIterable{
 struct TaskTypeSelector: View {
     
     @State var taskselection: TaskSelectionSection = .toDo
-
+    var selectedTask : (TaskSelectionSection) -> Void
+    
     var body: some View {
         
         Picker("", selection: $taskselection){
-         
+            
             ForEach(TaskSelectionSection.allCases, id: \.self)
             {
                 option in
@@ -32,10 +33,12 @@ struct TaskTypeSelector: View {
         }
         .pickerStyle(SegmentedPickerStyle())
         .padding(.leading, 5).padding(.trailing, 5)
-        
-            }
+        .onChange(of: taskselection) { oldValue, newValue in
+            selectedTask(newValue)
+        }
+    }
 }
 
 #Preview {
-    TaskTypeSelector()
+    TaskTypeSelector(){_ in}
 }

@@ -10,16 +10,35 @@ import SwiftData
 import UIKit
 import SwiftUI
 
+//enum TaskSelectionSection: String, CaseIterable{
+//    case toDo = "To Do"
+//    case completed = "Completed"
+//    case today = "Today"
+//    case upcoming = "Upcoming"
+//}
+
+
 @Observable
 class TaskViewModel {
+    
 
+//    @Binding var taskselection: TaskSelectionSection
+//    
+//        
+//    init(taskselection: TaskSelectionSection = .toDo) {
+//        self.taskselection = taskselection
+//    }
 
+    //@Query private var tasks: [Task]
+
+    
     
 //    // Read all tasks
 //    @Query private var tasks : [Task]
 //    
-//    func readTask() -> [Task]
+//    func readTask(context: ModelContext) -> [Task]
 //    {
+        
 //        return tasks
 //    }
     

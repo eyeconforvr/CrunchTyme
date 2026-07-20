@@ -16,3 +16,29 @@ protocol WeatherRepositoryProtocol
 {
     func getWeather(for city: String) async throws -> WeatherModel
 }
+
+//protocol Greeter {
+//    func greet(name: String) -> String
+//}
+//
+//class UserGreeter: Greeter {
+//    
+//    func greet(name: String) -> String {
+//        "Hello, \(name)!"
+//    }
+//}
+//
+//TestViewModel(greeter: UserGreeter())
+//
+//
+//class TestViewModel {
+//    let greeter: Greeter
+//    
+//    init(greeter: Greeter) {
+//        self.greeter = greeter
+//    }
+//    
+//    func greet() {
+//        greeter.greet(name: "")
+//    }
+//}

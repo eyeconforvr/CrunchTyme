@@ -71,8 +71,6 @@ let willItRain: Int
 let chanceOfRain: Int
 let willItSnow: Int
 let chanceOfSnow: Int
-let wetbulbC: Double
-let wetbulbF: Double
 let shortRad: Double
 let diffRad: Double
 let dni: Double
@@ -113,8 +111,6 @@ enum CodingKeys: String, CodingKey {
     case chanceOfRain = "chance_of_rain"
     case willItSnow = "will_it_snow"
     case chanceOfSnow = "chance_of_snow"
-    case wetbulbC = "wetbulb_c"
-    case wetbulbF = "wetbulb_f"
     case shortRad = "short_rad"
     case diffRad = "diff_rad"
     case dni
@@ -185,10 +181,7 @@ let dailyWillItSnow: Int
 let dailyChanceOfSnow: Int
 let condition: WeatherCondition
 let uv: Double
-let avgwetbulbC: Double
-let avgwetbulbF: Double
-let maxwetbulbC: Double
-let maxwetbulbF: Double
+
 
 
 
@@ -212,10 +205,6 @@ enum CodingKeys: String, CodingKey {
     case dailyWillItSnow = "daily_will_it_snow"
     case dailyChanceOfSnow = "daily_chance_of_snow"
     case condition, uv
-    case avgwetbulbC = "avgwetbulb_c"
-    case avgwetbulbF = "avgwetbulb_f"
-    case maxwetbulbC = "maxwetbulb_c"
-    case maxwetbulbF = "maxwetbulb_f"
 }
 
 
@@ -285,8 +274,6 @@ let visMiles: Double
 let gustMph: Double
 let gustKph: Double
 let uv: Double
-let wetbulbC: Double
-let wetbulbF: Double
 let shortRad: Double
 let diffRad: Double
 let dni: Double
@@ -328,8 +315,6 @@ enum CodingKeys: String, CodingKey {
     case gustMph = "gust_mph"
     case gustKph = "gust_kph"
     case uv
-    case wetbulbC = "wetbulb_c"
-    case wetbulbF = "wetbulb_f"
     case shortRad = "short_rad"
     case diffRad = "diff_rad"
     case dni

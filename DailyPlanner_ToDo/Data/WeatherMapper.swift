@@ -21,6 +21,8 @@ struct WeatherMapper
             sunrise: from.forecast.forecastday.first?.astro.sunrise ?? "",
             sunset: from.forecast.forecastday.first?.astro.sunset ?? "",
             currentTemp: String(from.current.tempC),
+            highTemp: String(from.forecast.forecastday.first?.day.maxtempC ?? 0.0),
+            lowTemp: String(from.forecast.forecastday.first?.day.mintempC ?? 0.0),
             icon: createIcon(condition: from.current.condition.text)
         )
     }
@@ -38,7 +40,7 @@ struct WeatherMapper
         }
         else
         {
-            return "sun.max.trianglebadge.exclamationmark.fill"
+            return "location"
         }
     }
 }

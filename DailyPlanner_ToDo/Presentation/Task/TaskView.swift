@@ -18,8 +18,9 @@ struct TaskView: View {
         NavigationStack{
             VStack(alignment: .leading){
                 
-                WeatherTray(viewModel: weatherViewModel).frame(alignment: .topLeading).padding(.leading, 6).padding(.top, 5)
+                MainWeatherView(viewModel: weatherViewModel).frame(alignment: .topLeading).padding(.leading, 10).padding(.top, 5).padding(.trailing, 10)
                 
+
                 Text("What's the gameplan today?").frame(maxWidth:.infinity,alignment: .leading).font(.headline).padding(.top, 10).padding(.leading,15)
                 
                 
@@ -42,14 +43,7 @@ struct TaskView: View {
                     .padding(.trailing, 15)
                     
                 }.frame(maxWidth: .infinity)
-                    .task {
-                        do {
-                            let  weather = try await WeatherService().getWeather(for: "London")
-                            debugPrint(weather)
-                                       } catch {
-                                           print("Error fetching weather: \(error)")
-                                       }
-                    }
+                   
                 
                 Spacer()
                 

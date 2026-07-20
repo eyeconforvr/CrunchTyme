@@ -8,18 +8,17 @@
 import Foundation
 import Combine
 
-// TODO: IMPLEMENT PROPER DEPEDENCY INJECTION
-
-class WeatherViewModel: ObservableObject {
+@Observable
+class WeatherViewModel {
     
     
     private let weatherService = WeatherRepository(weatherResponse: WeatherService())
     
-    @Published var weather: WeatherModel?
+    var weather: WeatherModel = WeatherModel()
     
     func fetchWeather(city: String) async throws {
         
-        self.weather = try await weatherService.getWeather(for: city)
+        weather = try await weatherService.getWeather(for: city)
     }
     
 }
