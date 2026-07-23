@@ -40,7 +40,7 @@ class TaskViewModel {
                 
             
             } catch {
-                print("Failed to fetch items: \(error.localizedDescription)")
+                print("Failed to fetch tasks: \(error.localizedDescription)")
             }
     }
     

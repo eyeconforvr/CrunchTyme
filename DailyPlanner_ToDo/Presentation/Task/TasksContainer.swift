@@ -65,15 +65,17 @@ struct TasksContainer: View {
                         }
                         
                         
-                    }
+                    }.scrollContentBackground(.hidden)
                     
                     Spacer()
-                }.padding(5)
+                }.padding(10)
                 
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color("Container"))
                 .cornerRadius(20)
-                .border(Color("Border"), width: 2)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20).strokeBorder(Color("Border"), lineWidth: 1)
+                )
                 .onAppear{
                     viewModel.fetchTasks(context: context)
                 }
