@@ -9,15 +9,15 @@ import Foundation
 
 struct WeatherRepository: WeatherRepositoryProtocol {
     
-    let weatherResponse : WeatherServiceProtocol
+    let weatherService : WeatherServiceProtocol
     
-    init(weatherResponse: WeatherServiceProtocol) {
-        self.weatherResponse = weatherResponse
+    init(weatherService: WeatherServiceProtocol) {
+        self.weatherService = weatherService
     }
     
     func getWeather(for city: String) async throws -> WeatherModel {
-        let weatherResponse = try await weatherResponse.getWeather(for: city)
-        return WeatherMapper.map(from: weatherResponse )
+        let weatherService = try await weatherService.getWeather(for: city)
+        return WeatherMapper.map(from: weatherService)
     }
     
     

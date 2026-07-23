@@ -12,13 +12,17 @@ import Combine
 class WeatherViewModel {
     
     
-    private let weatherService = WeatherRepository(weatherResponse: WeatherService())
+    private let weatherRepository : WeatherRepositoryProtocol
+    
+    init(weatherRepository: WeatherRepositoryProtocol) {
+        self.weatherRepository = weatherRepository
+    }
     
     var weather: WeatherModel = WeatherModel()
     
     func fetchWeather(city: String) async throws {
         
-        weather = try await weatherService.getWeather(for: city)
+        weather = try await weatherRepository.getWeather(for: city)
     }
     
 }

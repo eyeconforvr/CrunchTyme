@@ -10,39 +10,72 @@ import SwiftData
 import UIKit
 import SwiftUI
 
-//enum TaskSelectionSection: String, CaseIterable{
-//    case toDo = "To Do"
-//    case completed = "Completed"
-//    case today = "Today"
-//    case upcoming = "Upcoming"
-//}
 
 
 @Observable
 class TaskViewModel {
     
+    var tasks: [Task] = []
+    var filteredTasks : [Task] = []
+    var displayedTasks : [Task] = []
+    var isFiltered: Bool
 
-//    @Binding var taskselection: TaskSelectionSection
-//    
-//        
-//    init(taskselection: TaskSelectionSection = .toDo) {
-//        self.taskselection = taskselection
-//    }
-
-    //@Query private var tasks: [Task]
-
+    var taskselection: TaskSelectionSection = .toDo
     
+    private let filterProtocol : FilterUseCaseProtocol
     
-//    // Read all tasks
-//    @Query private var tasks : [Task]
-//    
-//    func readTask(context: ModelContext) -> [Task]
-//    {
+    init(filterProtocol: FilterUseCaseProtocol, isFiltered : Bool = false) {
+        self.filterProtocol = filterProtocol
+        self.isFiltered = isFiltered
+    }
+
+    func fetchTasks(context : ModelContext) {
+            let descriptor = FetchDescriptor<Task>(
+                sortBy: [SortDescriptor(\.dueDate, order: .reverse)]
+            )
         
-//        return tasks
-//    }
+            
+            do {
+                self.tasks = try context.fetch(descriptor)
+                
+            
+            } catch {
+                print("Failed to fetch items: \(error.localizedDescription)")
+            }
+    }
     
+    func filterTasks()
+    {
+        self.filteredTasks = self.tasks
+        self.filteredTasks = filterProtocol.filterTasksByCategory(unfilteredTasks: self.filteredTasks, taskselection: self.taskselection)
+    }
     
+    func isFilteredTasks() -> Bool
+    {
+        if self.taskselection == .toDo
+        {
+            self.isFiltered = false
+        }
+        else
+        {
+            self.isFiltered = true
+        }
+        
+        return self.isFiltered
+    }
+    
+    func fetchTasks() -> [Task]
+    {
+        if self.isFilteredTasks(){
+            self.displayedTasks = self.filteredTasks
+        }
+        else
+        {
+            self.displayedTasks = self.tasks
+        }
+        
+        return self.displayedTasks
+    }
     
     // Create Tasks
     

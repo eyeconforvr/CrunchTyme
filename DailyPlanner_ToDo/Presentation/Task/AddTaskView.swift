@@ -17,7 +17,7 @@ struct AddTaskView: View {
     @State private var taskdescription: String = ""
     
     @Environment(\.modelContext) private var context
-        @State private var viewModel = TaskViewModel()
+    @State private var viewModel = TaskViewModel(filterProtocol: FilterUseCase())
     
     
     var body: some View {

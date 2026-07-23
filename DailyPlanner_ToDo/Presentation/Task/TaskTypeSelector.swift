@@ -7,12 +7,7 @@
 
 import SwiftUI
 
-enum TaskSelectionSection: String, CaseIterable{
-    case toDo = "To Do"
-    case completed = "Completed"
-    case today = "Today"
-    case upcoming = "Upcoming"
-}
+
 
 
 struct TaskTypeSelector: View {

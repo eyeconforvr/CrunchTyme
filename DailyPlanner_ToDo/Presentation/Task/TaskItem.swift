@@ -23,9 +23,9 @@ struct TaskItem: View {
                     isCompleted(task)
                 }
                 Text(task.title).frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading).foregroundColor(Color("Text"))
-                
-            }
+                    .padding(.leading)
+            }.foregroundColor(.black)
+
             
         }.frame(maxWidth: .infinity)
             .cornerRadius(15)

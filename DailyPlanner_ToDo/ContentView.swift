@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ContentView: View
 {
-    var taskViewModel = TaskViewModel()
-    var weatherViewModel = WeatherViewModel()
+    var taskViewModel = TaskViewModel(filterProtocol: FilterUseCase())
+    var weatherViewModel = WeatherViewModel(weatherRepository: WeatherRepository(weatherService: WeatherService()))
     var body: some View {
         
         TaskView(taskViewModel: taskViewModel, weatherViewModel: weatherViewModel)
