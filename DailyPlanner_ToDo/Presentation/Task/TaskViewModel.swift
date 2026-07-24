@@ -15,66 +15,16 @@ import SwiftUI
 @Observable
 class TaskViewModel {
     
-    var tasks: [Task] = []
-    var filteredTasks : [Task] = []
-    var displayedTasks : [Task] = []
-    var isFiltered: Bool
-
     var taskselection: TaskSelectionSection = .toDo
     
-    private let filterProtocol : FilterUseCaseProtocol
+    private let taskFilterer : TaskFiltering
     
-    init(filterProtocol: FilterUseCaseProtocol, isFiltered : Bool = false) {
-        self.filterProtocol = filterProtocol
-        self.isFiltered = isFiltered
-    }
-
-    func fetchTasks(context : ModelContext) {
-            let descriptor = FetchDescriptor<Task>(
-                sortBy: [SortDescriptor(\.dueDate, order: .reverse)]
-            )
-        
-            
-            do {
-                self.tasks = try context.fetch(descriptor)
-                
-            
-            } catch {
-                print("Failed to fetch tasks: \(error.localizedDescription)")
-            }
+    init(filterProtocol: TaskFiltering, isFiltered : Bool = false) {
+        self.taskFilterer = filterProtocol
     }
     
-    func filterTasks()
-    {
-        self.filteredTasks = self.tasks
-        self.filteredTasks = filterProtocol.filterTasksByCategory(unfilteredTasks: self.filteredTasks, taskselection: self.taskselection)
-    }
-    
-    func isFilteredTasks() -> Bool
-    {
-        if self.taskselection == .toDo
-        {
-            self.isFiltered = false
-        }
-        else
-        {
-            self.isFiltered = true
-        }
-        
-        return self.isFiltered
-    }
-    
-    func fetchTasks() -> [Task]
-    {
-        if self.isFilteredTasks(){
-            self.displayedTasks = self.filteredTasks
-        }
-        else
-        {
-            self.displayedTasks = self.tasks
-        }
-        
-        return self.displayedTasks
+    func filterTasks(_ tasks: [Task]) -> [Task] {
+        taskFilterer.filter(tasks, by: taskselection)
     }
     
     // Create Tasks
@@ -82,12 +32,19 @@ class TaskViewModel {
     func addTask(title: String, description: String, dueDate: Date, context : ModelContext)
     {
         // create task
+        do {
+            let task = Task(title: title, description: description, isCompleted: false, dueDate: dueDate)
+            
+            context.insert(task)
+            
+            try context.save()
+            
+        }
+        catch
+        {
+            debugPrint(error.localizedDescription)
+        }
         
-        let task = Task(title: title, description: description, isCompleted: false, dueDate: dueDate)
-        
-        context.insert(task)
-        
-        try? context.save()
         
     }
     
@@ -96,6 +53,9 @@ class TaskViewModel {
     func deleteTask(_ task: Task , context : ModelContext)
     {
         context.delete(task)
+        try? context.save()
+        
+        
     }
     
     

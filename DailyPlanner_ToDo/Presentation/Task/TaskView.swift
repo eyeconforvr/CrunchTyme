@@ -28,30 +28,35 @@ struct TaskView: View {
                     
                     TasksContainer(viewModel: taskViewModel)
                     
-                    HStack(){
-                        Spacer()
-                        Button(action: {
-                            isSheetPresented = true
-                        }) {
-                            Circle()
-                                .fill(Color("Button"))
-                                .frame(width: 56, height: 56)
-                                .overlay(
-                                    Image(systemName: "plus")
-                                        .font(.title)
-                                        .foregroundColor(.white)
-                                )
-                        }
-                        .padding(.trailing, 15)
-                        
-                    }.frame(maxWidth: .infinity)
+//                    HStack(){
+//                        Spacer()
+//                        
+//                        
+//                    }.frame(maxWidth: .infinity)
                     
-                    
+                   
                     Spacer()
                     
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color("Background"))
                     .navigationBarTitle("Hello AJ!").foregroundColor(Color("Text"))
+                    .navigationBarItems(leading: EditButton(),
+                                                trailing:
+                    Button(action: {
+                        isSheetPresented = true
+                    }) {
+                        Circle()
+                            .foregroundColor(Color("Background"))
+    
+                            .overlay(
+                                Image(systemName: "square.and.pencil")
+                                    .resizable()
+                                    .renderingMode(.original)
+                                    .font(.title)
+                                    .frame(alignment: .center)
+                            )
+                    }
+                    )
                     .sheet(isPresented: $isSheetPresented) {
                         AddTaskView()
                             .presentationDetents([.medium])
@@ -63,6 +68,8 @@ struct TaskView: View {
         
     }
 }
+
+
 
 
 #Preview {

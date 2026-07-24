@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "0F9FFB1B-CC5E-4EA0-B6B3-FAFCCBA70E10",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:DailyPlanner_ToDo.xcodeproj",
+      "identifier" : "EAAAB4DF30061DB800518414",
+      "name" : "DailyPlanner_ToDo"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:DailyPlanner_ToDo.xcodeproj",
+        "identifier" : "EA7C5B8130134BB0006293F5",
+        "name" : "DailyPlanner_ToDoTests"
+      }
+    }
+  ],
+  "version" : 1
+}

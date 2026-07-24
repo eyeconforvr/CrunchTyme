@@ -22,9 +22,9 @@ struct MainWeatherView: View {
                         VStack {
                             Text("\(viewModel.weather.currentTemp)")
                             HStack {
-                                Image(systemName: "cloud.sun.rain.fill")
+                                Image(systemName: viewModel.weather.icon)
                                     .foregroundStyle(.white, .yellow, .white)
-                                Text("Sunny")
+                                Text(viewModel.weather.condition)
                             }
                             .font(.caption)
                         }.foregroundStyle(Color.white)

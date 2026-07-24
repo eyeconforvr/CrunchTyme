@@ -9,9 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct TasksContainer: View {
-    
+    @Query(sort: \Task.dueDate) private var tasks: [Task]
     @Environment(\.modelContext) private var context
-        
+    
     var viewModel : TaskViewModel
     
     
@@ -32,8 +32,6 @@ struct TasksContainer: View {
                     
                     TaskTypeSelector{ selection in
                         viewModel.taskselection = selection
-                        viewModel.filterTasks()
-                        
                     }
                     
                     
@@ -41,18 +39,19 @@ struct TasksContainer: View {
                     List{
                         
                         
-                        ForEach(viewModel.fetchTasks(), id: \.self){ task in
+                        ForEach(viewModel.filterTasks(tasks), id: \.self){ task in
                             
                             TaskItem(task: task){ task in
                                 task.isCompleted.toggle()
                             }
                             
-                        }.onDelete{ indexSet in
+                        }
+                        .onMove(perform: moveTask)
+                        .onDelete{ indexSet in
                             for index in indexSet{
-                                let itemsToDelete = viewModel.tasks[index]
+                                let itemsToDelete = tasks[index]
                                 viewModel.deleteTask(itemsToDelete, context: context)
                             }
-                            
                         }
                         .listRowBackground(Color.white)
                         .lineLimit(1)
@@ -70,16 +69,21 @@ struct TasksContainer: View {
                     Spacer()
                 }.padding(10)
                 
-            }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color("Container"))
-                .cornerRadius(20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20).strokeBorder(Color("Border"), lineWidth: 1)
-                )
-                .onAppear{
-                    viewModel.fetchTasks(context: context)
-                }
-        }.padding(5)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color("Container"))
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20).strokeBorder(Color("Border"), lineWidth: 1)
+            )
+            .onAppear{
+//                viewModel.fetchTasks(context: context)
+            }
+        }.padding(10)
+    }
+    
+    func moveTask(from: IndexSet, to: Int) {
+//        tasks.move(fromOffsets: from, toOffset: to)
     }
 }
 
@@ -87,12 +91,12 @@ struct TasksContainer: View {
     List{
         
         ForEach(0..<10){
-           Text("Trying to style list item \($0)")
+            Text("Trying to style list item \($0)")
         }
-            
-        }
-        .listRowBackground(Color.white)
-        .listRowSeparator(.hidden)
         
+    }
+    .listRowBackground(Color.white)
+    .listRowSeparator(.hidden)
+    
     
 }
