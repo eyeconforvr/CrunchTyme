@@ -12,7 +12,7 @@ import SwiftData
 struct DailyPlanner_ToDoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView()
         }.modelContainer(for: Task.self)
     }
 }

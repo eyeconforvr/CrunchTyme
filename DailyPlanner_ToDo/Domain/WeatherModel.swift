@@ -17,6 +17,7 @@ struct WeatherModel
     let icon : String
     let condition : String
     
+    
     init(sunrise: String = "", sunset: String  = "" , currentTemp: String  = "" ,highTemp: String = " ", lowTemp: String = "", icon: String  = "", condition: String  = "") {
         self.sunrise = sunrise
         self.sunset = sunset

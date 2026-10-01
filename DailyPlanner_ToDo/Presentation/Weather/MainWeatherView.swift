@@ -1,79 +1,53 @@
 //
-//  MainWeatherView.swift
+//  MainWeatherScreen.swift
 //  DailyPlanner_ToDo
 //
-//  Created by AJ Mhlanga on 2026/07/16.
+//  Created by AJ Mhlanga on 2026/09/12.
 //
 
 import SwiftUI
 
-struct MainWeatherView: View {
-    @State var viewModel : WeatherViewModel
+struct MainWeatherScreen: View {
+    var weatherViewModel: WeatherViewModel
     
+    private var sunrise: Date? {
+        WeatherTimeParser.date(
+            from: weatherViewModel.weather.sunrise
+        )
+    }
+
+    private var sunset: Date? {
+        WeatherTimeParser.date(
+            from: weatherViewModel.weather.sunset
+        )
+    }
     var body: some View {
-        GroupBox {
-            LazyVGrid(columns: [
-                .init(.flexible(), spacing: 16, alignment: .center),
-                .init(.flexible(), spacing: 16, alignment: .center),
-                .init(.flexible(), spacing: 16, alignment: .center)
-            ]) {
-                VStack {
-                    HStack {
-                        VStack {
-                            Text("\(viewModel.weather.currentTemp)")
-                            HStack {
-                                Image(systemName: viewModel.weather.icon)
-                                    .foregroundStyle(.white, .yellow, .white)
-                                Text(viewModel.weather.condition)
-                            }
-                            .font(.caption)
-                        }.foregroundStyle(Color.white)
-                        
-                    }
-                    .font(.title)
-                    
-                }
-                
-                
-                VStack {
-                    Text("High: \(viewModel.weather.highTemp)")
-                    Text("Low : \(viewModel.weather.lowTemp)")
-                }.font(.subheadline).foregroundStyle(Color.white)
-                
-                VStack {
-                    HStack{
-                        Image(systemName: "sunrise").foregroundStyle(.white,.yellow)
-                        Text("\(viewModel.weather.sunrise)")
-                    }.foregroundStyle(Color.white)
-                    HStack{
-                        Image(systemName: "sunset").foregroundStyle(.white,.yellow)
-                        Text("\(viewModel.weather.sunset)")
-                    }
-                }.font(.subheadline).foregroundStyle(Color.white)
-                
-                
-            }
-            .task {
-                do {
-                    try await viewModel.fetchWeather(city: "Sandton")
-                    
-                } catch {
-                    print("Error fetching weather: \(error)")
+        ScrollView {
+            VStack(spacing: 12) {
+
+                CurrentWeatherCard(viewModel: weatherViewModel)
+
+                ForecastView()
+
+                WeatherInfoTilesView()
+
+                if let sunrise = sunrise,
+                    let sunset = sunset
+                {
+                SunCycleView(sunrise: sunrise,sunset: sunset,
+                             condition: weatherViewModel.weather.condition,
+                                 temperature: weatherViewModel.weather.currentTemp
+                )
                 }
             }
-            
-        } label: {
-            HStack {
-                Text("Sandton")
-                Image(systemName: "location.fill").font(.caption)
-            }.frame(maxWidth: .infinity).foregroundStyle(Color.white)
+            .padding(.horizontal, 10)
+        }.onAppear {
+            print("SUNRISE:", weatherViewModel.weather.sunrise)
+            print("SUNSET:", weatherViewModel.weather.sunset)
         }
-        .dynamicTypeSize(.xSmall ... .large).backgroundStyle(Color.accentColor.opacity(0.8))
     }
 }
 
-
 #Preview {
-//    MainWeatherView()
-//        .padding()
+    MainWeatherScreen(weatherViewModel : WeatherViewModel(weatherRepository: WeatherRepository(weatherService: WeatherService())))
 }
