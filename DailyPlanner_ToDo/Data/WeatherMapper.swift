@@ -10,10 +10,6 @@ import Foundation
 // TODO: GET SPECIFIC FORECAST FOR DAY
 // TODO: CREATE AN ENUM THAT HAS ALL WEATHER CONDITIONS, USE ENUM TO DO SWITCH CASE FOR ICONS
 
-
-
-
-
 struct WeatherMapper
 {
     private static let icons: [String: String] = [
