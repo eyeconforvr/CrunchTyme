@@ -20,7 +20,7 @@ struct TaskView: View {
             
                 VStack(alignment: .leading){
                     
-                    MainWeatherView(viewModel: weatherViewModel).frame(alignment: .topLeading).padding(.leading, 10).padding(.top, 5).padding(.trailing, 10)
+                    WeatherTray(viewModel: weatherViewModel).frame(alignment: .topLeading).padding(.leading, 10).padding(.top, 5).padding(.trailing, 10)
                     
                     
                     Text("What's the gameplan today?").frame(maxWidth:.infinity,alignment: .leading).font(.headline).padding(.top, 10).padding(.leading,15).foregroundColor(Color("Text"))
