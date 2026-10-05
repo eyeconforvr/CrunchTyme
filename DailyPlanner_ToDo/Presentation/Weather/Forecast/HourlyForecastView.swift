@@ -9,12 +9,22 @@ import SwiftUI
 
 struct HourlyForecastView: View {
 
+    var viewModel: WeatherViewModel
+
     var body: some View {
+
         ScrollView(.horizontal, showsIndicators: false) {
+
             HStack(spacing: 10) {
 
-                ForEach(0..<24, id: \.self) { _ in
-                    ForecastCard()
+                ForEach(viewModel.weather.hourlyForecast, id: \.time) { forecast in
+
+                    ForecastCard(
+                        label: forecast.time,
+                        highTemp: forecast.highTemp,
+                        lowTemp: forecast.lowTemp,
+                        icon: forecast.icon
+                    )
                 }
             }
         }
@@ -22,5 +32,5 @@ struct HourlyForecastView: View {
 }
 
 #Preview {
-    HourlyForecastView()
+//    HourlyForecastView()
 }

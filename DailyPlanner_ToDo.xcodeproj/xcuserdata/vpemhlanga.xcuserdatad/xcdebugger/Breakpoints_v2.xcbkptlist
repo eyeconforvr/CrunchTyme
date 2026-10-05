@@ -46,9 +46,9 @@
             filePath = "DailyPlanner_ToDo/Domain/WeatherModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "24"
-            endingLineNumber = "24"
-            landmarkName = "init(sunrise:sunset:currentTemp:highTemp:lowTemp:icon:condition:)"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
+            landmarkName = "init(sunrise:sunset:currentTemp:highTemp:lowTemp:icon:condition:dailyForecast:hourlyForecast:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -98,6 +98,22 @@
             endingLineNumber = "28"
             landmarkName = "body"
             landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D733DBCE-2AA3-4350-9C9A-09FAC69BA05F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DailyPlanner_ToDo/Data/WeatherMapper.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "90"
+            endingLineNumber = "90"
+            landmarkName = "map(from:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -87,7 +87,7 @@ struct CalendarView<Task: CalendarTask>: View {
     private var header: some View {
         HStack {
             Button {
-                // handle back navigation
+                
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))

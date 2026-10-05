@@ -30,4 +30,38 @@ struct WeatherTimeParser {
             of: Date()
         )
     }
+    
+     static func dayOfWeek(from date: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        guard let date = formatter.date(from: date) else {
+            return ""
+        }
+
+        formatter.dateFormat = "EEEE"
+
+        return formatter.string(from: date)
+    }
+    
+    static func formatHour(from time: String) -> String {
+        guard let date = parseHour(from: time) else {
+            return time
+        }
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "h a"
+        outputFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+        return outputFormatter.string(from: date)
+    }
+
+     static func parseHour(from time: String) -> Date? {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+        return inputFormatter.date(from: time)
+    }
 }

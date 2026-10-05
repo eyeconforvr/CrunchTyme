@@ -9,19 +9,26 @@ import SwiftUI
 
 struct ForecastCard: View {
 
+    let label: String
+    let highTemp: String
+    let lowTemp: String
+    let icon: String
+
     var body: some View {
+
         VStack(spacing: 6) {
-            Text("MON")
+
+            Text(label)
                 .font(.caption)
                 .bold()
 
-            Text("☀️")
+            Image(systemName: icon)
                 .font(.title)
 
-            Text("28°")
+            Text(highTemp)
                 .font(.headline)
 
-            Text("18°")
+            Text(lowTemp)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -32,5 +39,10 @@ struct ForecastCard: View {
 }
 
 #Preview {
-    ForecastCard()
+    ForecastCard(
+        label: "MON",
+        highTemp: "28°C",
+        lowTemp: "18°C",
+        icon: "sun.max.fill"
+    )
 }

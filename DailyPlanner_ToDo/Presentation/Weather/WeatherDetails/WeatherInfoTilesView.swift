@@ -11,18 +11,11 @@ struct WeatherInfoTilesView: View {
 
     var body: some View {
         HStack(spacing: 10) {
-
-            NavigationLink {
-                AirQualityView()
-            } label: {
+           
                 AirQualityTile()
-            }
 
-            NavigationLink {
-                HumidityView()
-            } label: {
                 HumidityTile()
-            }
+            
         }
     }
 }

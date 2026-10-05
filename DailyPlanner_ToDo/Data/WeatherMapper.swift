@@ -31,16 +31,72 @@ struct WeatherMapper
         "Blizzard": "wind.snow"
     ]
     
+    
+    
     static func map(from : WeatherResponse) -> WeatherModel
     {
-        WeatherModel(
+        
+        let dailyForecast = from.forecast.forecastday.map { forecastDay in
+            DailyForecastModel(
+                day: WeatherTimeParser.dayOfWeek(from: forecastDay.date),
+                highTemp: String(forecastDay.day.maxtempC),
+                lowTemp: String(forecastDay.day.mintempC),
+                icon: createIcon(condition: forecastDay.day.condition.text),
+                condition: forecastDay.day.condition.text
+            )
+            
+        }
+        
+        let calendar = Calendar.current
+
+        let currentHour = calendar.date(
+            bySettingHour: calendar.component(.hour, from: Date()),
+            minute: 0,
+            second: 0,
+            of: Date()
+        )!
+
+        let twentyFourHoursLater = calendar.date(
+            byAdding: .hour,
+            value: 24,
+            to: currentHour
+        )!
+
+        let hourlyForecast = from.forecast.forecastday
+            .flatMap { forecastDay in
+                forecastDay.hour
+                    .filter { hour in
+                        guard let hourDate = WeatherTimeParser.parseHour(from: hour.time) else {
+                            return false
+                        }
+
+                        return hourDate >= currentHour &&
+                               hourDate < twentyFourHoursLater
+                    }
+            }
+            .enumerated()
+            .map { index, hour in
+                HourlyForecastModel(
+                    time: index == 0
+                        ? "Now"
+                    : WeatherTimeParser.formatHour(from: hour.time),
+                    highTemp: String(hour.tempC),
+                    lowTemp: String(hour.tempC),
+                    icon: createIcon(condition: hour.condition.text),
+                    condition: hour.condition.text
+                )
+            }
+        
+        return WeatherModel(
             sunrise: from.forecast.forecastday.first?.astro.sunrise ?? "",
             sunset: from.forecast.forecastday.first?.astro.sunset ?? "",
             currentTemp: String(from.current.tempC),
             highTemp: String(from.forecast.forecastday.first?.day.maxtempC ?? 0.0),
             lowTemp: String(from.forecast.forecastday.first?.day.mintempC ?? 0.0),
             icon: createIcon(condition: from.current.condition.text),
-            condition: from.current.condition.text
+            condition: from.current.condition.text,
+            dailyForecast: dailyForecast,
+            hourlyForecast: hourlyForecast
         )
     }
     

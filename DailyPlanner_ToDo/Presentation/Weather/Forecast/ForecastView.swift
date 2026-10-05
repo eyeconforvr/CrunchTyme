@@ -15,6 +15,7 @@ struct ForecastView: View {
     }
 
     @State private var mode: ForecastMode = .daily
+    var viewModel: WeatherViewModel
 
     var body: some View {
         VStack(spacing: 10) {
@@ -30,15 +31,15 @@ struct ForecastView: View {
 
             switch mode {
             case .daily:
-                DailyForecastView()
+                DailyForecastView(viewModel: viewModel)
 
             case .hourly:
-                HourlyForecastView()
+                HourlyForecastView(viewModel: viewModel)
             }
         }
     }
 }
 
 #Preview {
-    ForecastView()
+//    ForecastView()
 }
