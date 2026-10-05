@@ -29,18 +29,6 @@ struct MainWeatherScreen: View {
             }
             .padding(.horizontal, 10)
         }
-        .onAppear {
-
-            print(
-                "SUNRISE:",
-                weatherViewModel.weather.sunrise
-            )
-
-            print(
-                "SUNSET:",
-                weatherViewModel.weather.sunset
-            )
-        }
     }
 }
 
