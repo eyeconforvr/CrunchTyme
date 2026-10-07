@@ -36,7 +36,7 @@ struct WeatherModel
     let icon : String
     let condition : String
     let dailyForecast: [DailyForecastModel]
-   let hourlyForecast: [HourlyForecastModel]
+    let hourlyForecast: [HourlyForecastModel]
     
     init(sunrise: String = "", sunset: String  = "" , currentTemp: String  = "" ,highTemp: String = " ", lowTemp: String = "", icon: String  = "", condition: String  = "", dailyForecast: [DailyForecastModel] = [], hourlyForecast: [HourlyForecastModel] = []) {
         self.sunrise = sunrise

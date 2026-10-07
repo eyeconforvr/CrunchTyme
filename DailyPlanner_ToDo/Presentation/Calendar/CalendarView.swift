@@ -1,10 +1,6 @@
 //
 //  CalendarTimelineView.swift
-//  Todo app — day timeline screen
 //
-//  Drop this file into your Xcode project. Requires iOS 16+ (uses
-//  `RoundedRectangle` + `ContainerRelativeShape` patterns available earlier
-//  too, but written/tested against iOS 16 SwiftUI).
 //
 
 import SwiftUI

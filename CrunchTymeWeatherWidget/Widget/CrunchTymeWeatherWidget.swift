@@ -17,7 +17,8 @@ struct Provider: TimelineProvider {
             condition: "Mostly Clear",
             location: "Sandton",
             sunrise: Date(),
-            sunset: Date()
+            sunset: Date(),
+            dailyForecast: []
         )
     }
 
@@ -31,7 +32,8 @@ struct Provider: TimelineProvider {
             condition: "Mostly Clear",
             location: "Sandton",
             sunrise: Date(),
-            sunset: Date()
+            sunset: Date(),
+            dailyForecast: []
         )
 
         completion(entry)
@@ -41,20 +43,59 @@ struct Provider: TimelineProvider {
         in context: Context,
         completion: @escaping (Timeline<SimpleEntry>) -> ()
     ) {
+
         let currentDate = Date()
+
+        guard let weather = WeatherDataStore.load() else {
+
+            let entry = SimpleEntry(
+                date: currentDate,
+                temperature: "--",
+                condition: "Weather unavailable",
+                location: "Sandton",
+                sunrise: currentDate,
+                sunset: currentDate,
+                dailyForecast: []
+            )
+
+            let timeline = Timeline(
+                entries: [entry],
+                policy: .after(
+                    Calendar.current.date(
+                        byAdding: .minute,
+                        value: 30,
+                        to: currentDate
+                    ) ?? currentDate
+                )
+            )
+
+            completion(timeline)
+            return
+        }
 
         let entry = SimpleEntry(
             date: currentDate,
-            temperature: "28°C",
-            condition: "Mostly Clear",
+            temperature: weather.currentTemp,
+            condition: weather.condition,
             location: "Sandton",
-            sunrise: Date(),
-            sunset: Date()
+            sunrise: WeatherTimeParser.date(
+                from: weather.sunrise
+            ) ?? currentDate,
+            sunset: WeatherTimeParser.date(
+                from: weather.sunset
+            ) ?? currentDate,
+            dailyForecast: weather.dailyForecast
         )
 
         let timeline = Timeline(
             entries: [entry],
-            policy: .atEnd
+            policy: .after(
+                Calendar.current.date(
+                    byAdding: .minute,
+                    value: 30,
+                    to: currentDate
+                ) ?? currentDate
+            )
         )
 
         completion(timeline)
@@ -62,12 +103,14 @@ struct Provider: TimelineProvider {
 }
 
 struct SimpleEntry: TimelineEntry {
+
     let date: Date
     let temperature: String
     let condition: String
     let location: String
     let sunrise: Date
     let sunset: Date
+    let dailyForecast: [SharedDailyForecast]
 }
 
 struct CrunchTymeWeatherWidgetEntryView: View {
@@ -75,6 +118,7 @@ struct CrunchTymeWeatherWidgetEntryView: View {
     var entry: Provider.Entry
 
     var body: some View {
+
         VStack(spacing: 0) {
 
             // MARK: - Top Weather Info
@@ -82,6 +126,7 @@ struct CrunchTymeWeatherWidgetEntryView: View {
             HStack(alignment: .top) {
 
                 VStack(alignment: .leading, spacing: 2) {
+
                     Text(entry.location)
                         .font(.caption)
                         .fontWeight(.medium)
@@ -99,44 +144,25 @@ struct CrunchTymeWeatherWidgetEntryView: View {
 
             // MARK: - Sun Arc
 
-            ZStack {
-
-                ArcShape()
-                    .stroke(
-                        .orange,
-                        style: StrokeStyle(
-                            lineWidth: 3,
-                            lineCap: .round
-                        )
-                    )
-
-                ZStack {
-                    // Outer glow
-                    Circle()
-                        .fill(.orange.opacity(0.18))
-                        .frame(width: 48, height: 48)
-                        .blur(radius: 8)
-
-                    // Inner glow
-                    Circle()
-                        .fill(.yellow.opacity(0.20))
-                        .frame(width: 34, height: 34)
-                        .blur(radius: 4)
-
-                    // Sun
-                    Image(systemName: "sun.max.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.orange)
-                }
-                .offset(y: -18)
-            }
-            .frame(height: 75)
+            WidgetSunArcView(
+                sunrise: entry.sunrise,
+                sunset: entry.sunset,
+                currentTime: Calendar.current.date(
+                    bySettingHour: 20,
+                    minute: 30,
+                    second: 0,
+                    of: entry.date
+                ) ?? entry.date,
+                height: 75,
+                sunSize: 20
+            )
 
             // MARK: - Sunrise / Sunset
 
             HStack {
 
                 HStack(spacing: 4) {
+
                     Image(systemName: "sunrise.fill")
                         .font(.caption2)
 
@@ -152,6 +178,7 @@ struct CrunchTymeWeatherWidgetEntryView: View {
                 Spacer()
 
                 HStack(spacing: 4) {
+
                     Text(
                         entry.sunset.formatted(
                             date: .omitted,
@@ -166,37 +193,73 @@ struct CrunchTymeWeatherWidgetEntryView: View {
             }
         }
         .padding(12)
+        .widgetURL(
+            URL(string: "crunchtyme://weather")
+        )
     }
 }
 
-struct ArcShape: Shape {
+struct WidgetArcShape: Shape {
 
     func path(in rect: CGRect) -> Path {
+
         var path = Path()
+
+        let startX = rect.minX
+        let endX = rect.maxX
+        let bottomY = rect.maxY - 5
 
         path.move(
             to: CGPoint(
-                x: rect.minX,
-                y: rect.maxY - 5
+                x: startX,
+                y: bottomY
             )
         )
 
         path.addCurve(
             to: CGPoint(
-                x: rect.maxX,
-                y: rect.maxY - 5
+                x: endX,
+                y: bottomY
             ),
             control1: CGPoint(
-                x: rect.minX + rect.width * 0.25,
-                y: rect.minY - 25
+                x: startX + rect.width * 0.25,
+                y: rect.minY + 5
             ),
             control2: CGPoint(
-                x: rect.maxX - rect.width * 0.25,
-                y: rect.minY - 25
+                x: endX - rect.width * 0.25,
+                y: rect.minY + 5
             )
         )
 
         return path
+    }
+}
+
+struct CrunchTymeWeatherWidgetFamilyView: View {
+
+    @Environment(\.widgetFamily)
+    private var widgetFamily
+
+    let entry: SimpleEntry
+
+    var body: some View {
+
+        switch widgetFamily {
+
+
+        case .systemLarge:
+            WidgetMediumView(
+                entry: entry
+            )
+            
+        case .systemExtraLargePortrait:
+            WidgetExtraLargeView( entry: entry )
+
+        default:
+            CrunchTymeWeatherWidgetEntryView(
+                entry: entry
+            )
+        }
     }
 }
 
@@ -212,29 +275,45 @@ struct CrunchTymeWeatherWidget: Widget {
         ) { entry in
 
             if #available(iOS 17.0, *) {
-                CrunchTymeWeatherWidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
+
+                CrunchTymeWeatherWidgetFamilyView(
+                    entry: entry
+                )
+                .containerBackground(
+                    .fill.tertiary,
+                    for: .widget
+                )
+
             } else {
-                CrunchTymeWeatherWidgetEntryView(entry: entry)
-                    .padding()
-                    .background()
+
+                CrunchTymeWeatherWidgetFamilyView(
+                    entry: entry
+                )
+                .padding()
+                .background()
             }
         }
         .configurationDisplayName("Weather")
-        .description("Current weather and sun position.")
+        .description(
+            "Current weather and sun position."
+        )
     }
 }
 
 #Preview(as: .systemSmall) {
+
     CrunchTymeWeatherWidget()
+
 } timeline: {
+
     SimpleEntry(
         date: .now,
         temperature: "28°C",
         condition: "Mostly Clear",
         location: "Sandton",
         sunrise: .now,
-        sunset: .now
+        sunset: .now,
+        dailyForecast: []
     )
 }
 
