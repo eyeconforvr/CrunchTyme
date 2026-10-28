@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>CrunchTymeWeatherWidgetExtension.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>DailyPlanner_ToDo.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
@@ -18,6 +23,11 @@
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>EA7C5B8130134BB0006293F5</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>EA999172307391D700EE186A</key>
 		<dict>
 			<key>primary</key>
 			<true/>

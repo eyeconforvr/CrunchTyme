@@ -8,30 +8,30 @@
 import SwiftUI
 
 struct SunArcView: View {
+
     let dayProgress: Double
     let nightProgress: Double
     let isDaytime: Bool
     let glowAmount: Double
 
     var body: some View {
+
         GeometryReader { geometry in
 
             let width = geometry.size.width
             let height = geometry.size.height
 
             let centerX = width / 2
-            let centerY = height / 2
+            let centerY = height - 8
 
-            let radius = min(
-                width / 2 - 20,
-                height / 2 - 10
-            )
+            let radius = width / 2 - 8
 
             ZStack {
 
-                // MARK: - Day Arc
+                // MARK: - Background Arc
 
                 Path { path in
+
                     path.addArc(
                         center: CGPoint(
                             x: centerX,
@@ -44,12 +44,16 @@ struct SunArcView: View {
                     )
                 }
                 .stroke(
-                    .gray.opacity(0.15),
+                    isDaytime
+                        ? .orange.opacity(0.18)
+                        : .blue.opacity(0.18),
                     lineWidth: 8
                 )
 
-                // Day elapsed
+                // MARK: - Active Arc
+
                 Path { path in
+
                     path.addArc(
                         center: CGPoint(
                             x: centerX,
@@ -63,137 +67,65 @@ struct SunArcView: View {
                 }
                 .trim(
                     from: 0,
-                    to: dayProgress
+                    to: isDaytime
+                        ? dayProgress
+                        : nightProgress
                 )
                 .stroke(
-                    .orange.opacity(
-                        isDaytime ? 0.8 : 0.2
-                    ),
+                    isDaytime
+                        ? .orange.opacity(0.9)
+                        : .blue.opacity(0.9),
                     style: StrokeStyle(
-                        lineWidth: 4,
+                        lineWidth: 5,
                         lineCap: .round
                     )
                 )
 
-                // Day remaining
-                Path { path in
-                    path.addArc(
-                        center: CGPoint(
-                            x: centerX,
-                            y: centerY
-                        ),
-                        radius: radius,
-                        startAngle: .degrees(180),
-                        endAngle: .degrees(360),
-                        clockwise: false
-                    )
-                }
-                .trim(
-                    from: dayProgress,
-                    to: 1
+                // MARK: - Start Marker
+                Image(
+                    systemName: isDaytime
+                        ? "sunrise.fill"
+                        : "moonrise.fill"
                 )
-                .stroke(
-                    .orange.opacity(
-                        isDaytime ? 0.25 : 0.08
-                    ),
-                    style: StrokeStyle(
-                        lineWidth: 4,
-                        lineCap: .round
-                    )
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(
+                    isDaytime
+                        ? .orange
+                        : .cyan
+                )
+                .shadow(
+                    color: .black.opacity(0.6),
+                    radius: 2,
+                    x: 0,
+                    y: 1
+                )
+                .position(
+                    x: centerX - radius,
+                    y: centerY
                 )
 
-                // MARK: - Night Arc
-
-                Path { path in
-                    path.addArc(
-                        center: CGPoint(
-                            x: centerX,
-                            y: centerY
-                        ),
-                        radius: radius,
-                        startAngle: .degrees(0),
-                        endAngle: .degrees(180),
-                        clockwise: false
-                    )
-                }
-                .stroke(
-                    .blue.opacity(0.15),
-                    lineWidth: 8
+                // MARK: - End Marker
+                Image(
+                    systemName: isDaytime
+                        ? "sunset.fill"
+                        : "moonset.fill"
                 )
-
-                // Night elapsed
-                Path { path in
-                    path.addArc(
-                        center: CGPoint(
-                            x: centerX,
-                            y: centerY
-                        ),
-                        radius: radius,
-                        startAngle: .degrees(0),
-                        endAngle: .degrees(180),
-                        clockwise: false
-                    )
-                }
-                .trim(
-                    from: 0,
-                    to: nightProgress
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(
+                    isDaytime
+                        ? .orange
+                        : .cyan
                 )
-                .stroke(
-                    .blue.opacity(
-                        isDaytime ? 0.08 : 0.7
-                    ),
-                    style: StrokeStyle(
-                        lineWidth: 4,
-                        lineCap: .round
-                    )
+                .shadow(
+                    color: .black.opacity(0.6),
+                    radius: 2,
+                    x: 0,
+                    y: 1
                 )
-
-                // Night remaining
-                Path { path in
-                    path.addArc(
-                        center: CGPoint(
-                            x: centerX,
-                            y: centerY
-                        ),
-                        radius: radius,
-                        startAngle: .degrees(0),
-                        endAngle: .degrees(180),
-                        clockwise: false
-                    )
-                }
-                .trim(
-                    from: nightProgress,
-                    to: 1
+                .position(
+                    x: centerX + radius,
+                    y: centerY
                 )
-                .stroke(
-                    .blue.opacity(
-                        isDaytime ? 0.08 : 0.2
-                    ),
-                    style: StrokeStyle(
-                        lineWidth: 4,
-                        lineCap: .round
-                    )
-                )
-
-                // MARK: - Sunrise Marker
-
-                Image(systemName: "sunrise.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.orange)
-                    .position(
-                        x: centerX - radius,
-                        y: centerY
-                    )
-
-                // MARK: - Sunset Marker
-
-                Image(systemName: "sunset.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.orange)
-                    .position(
-                        x: centerX + radius,
-                        y: centerY
-                    )
 
                 // MARK: - Sun / Moon
 
@@ -202,8 +134,8 @@ struct SunArcView: View {
                     Circle()
                         .fill(
                             isDaytime
-                            ? .yellow.opacity(glowAmount)
-                            : .blue.opacity(glowAmount)
+                                ? .yellow.opacity(glowAmount)
+                                : .white.opacity(glowAmount)
                         )
                         .frame(
                             width: 60,
@@ -238,7 +170,7 @@ struct SunArcView: View {
                 )
             }
         }
-        .frame(height: 220)
+        .frame(height: 150)
     }
 
     // MARK: - Sun Position
@@ -270,8 +202,8 @@ struct SunArcView: View {
 
         let angle = Double.pi * nightProgress
 
-        let x = centerX + cos(angle) * radius
-        let y = centerY + sin(angle) * radius
+        let x = centerX - cos(angle) * radius
+        let y = centerY - sin(angle) * radius
 
         return CGPoint(
             x: x,
@@ -281,6 +213,7 @@ struct SunArcView: View {
 }
 
 #Preview {
+
     SunArcView(
         dayProgress: 0.5,
         nightProgress: 0,

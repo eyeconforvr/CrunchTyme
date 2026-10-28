@@ -1,10 +1,6 @@
 //
 //  CalendarTimelineView.swift
-//  Todo app — day timeline screen
 //
-//  Drop this file into your Xcode project. Requires iOS 16+ (uses
-//  `RoundedRectangle` + `ContainerRelativeShape` patterns available earlier
-//  too, but written/tested against iOS 16 SwiftUI).
 //
 
 import SwiftUI
@@ -87,7 +83,7 @@ struct CalendarView<Task: CalendarTask>: View {
     private var header: some View {
         HStack {
             Button {
-                // handle back navigation
+                
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))
