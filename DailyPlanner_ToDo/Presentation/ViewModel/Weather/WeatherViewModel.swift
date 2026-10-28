@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import WidgetKit
 
 @Observable
 class WeatherViewModel {
@@ -42,6 +43,8 @@ class WeatherViewModel {
             }
         )
         WeatherDataStore.save(sharedWeather)
+        
+        WidgetCenter.shared.reloadTimelines( ofKind: "CrunchTymeWeatherWidget" )
     }
 
 }

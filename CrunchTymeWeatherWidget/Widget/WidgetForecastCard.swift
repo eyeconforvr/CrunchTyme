@@ -10,11 +10,12 @@ import SwiftUI
 struct WidgetForecastCard: View {
 
     let forecast: SharedDailyForecast
+    private let dayName: DayFiltering = DayNameUseCase()
 
     var body: some View {
         VStack(spacing: 4) {
 
-            Text(forecast.day)
+            Text(dayName.abbreviateDay(forecast.day))
                 .font(.caption2)
                 .fontWeight(.medium)
 

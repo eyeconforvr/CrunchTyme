@@ -11,10 +11,11 @@ import SwiftUI
 struct Provider: TimelineProvider {
 
     func placeholder(in context: Context) -> SimpleEntry {
+
         SimpleEntry(
             date: Date(),
             temperature: "28°C",
-            condition: "Mostly Clear",
+            condition: "Sunny",
             location: "Sandton",
             sunrise: Date(),
             sunset: Date(),
@@ -26,10 +27,11 @@ struct Provider: TimelineProvider {
         in context: Context,
         completion: @escaping (SimpleEntry) -> ()
     ) {
+
         let entry = SimpleEntry(
             date: Date(),
             temperature: "28°C",
-            condition: "Mostly Clear",
+            condition: "Sunny",
             location: "Sandton",
             sunrise: Date(),
             sunset: Date(),
@@ -111,6 +113,12 @@ struct SimpleEntry: TimelineEntry {
     let sunrise: Date
     let sunset: Date
     let dailyForecast: [SharedDailyForecast]
+
+    // MARK: - Day / Night
+
+    var isDay: Bool {
+        date >= sunrise && date < sunset
+    }
 }
 
 struct CrunchTymeWeatherWidgetEntryView: View {
@@ -120,6 +128,7 @@ struct CrunchTymeWeatherWidgetEntryView: View {
     var body: some View {
 
         VStack(spacing: 0) {
+            
 
             // MARK: - Top Weather Info
 
@@ -147,12 +156,7 @@ struct CrunchTymeWeatherWidgetEntryView: View {
             WidgetSunArcView(
                 sunrise: entry.sunrise,
                 sunset: entry.sunset,
-                currentTime: Calendar.current.date(
-                    bySettingHour: 20,
-                    minute: 30,
-                    second: 0,
-                    of: entry.date
-                ) ?? entry.date,
+                currentTime: entry.date,
                 height: 75,
                 sunSize: 20
             )
@@ -246,16 +250,20 @@ struct CrunchTymeWeatherWidgetFamilyView: View {
 
         switch widgetFamily {
 
-
         case .systemLarge:
+
             WidgetMediumView(
                 entry: entry
             )
-            
+
         case .systemExtraLargePortrait:
-            WidgetExtraLargeView( entry: entry )
+
+            WidgetExtraLargeView(
+                entry: entry
+            )
 
         default:
+
             CrunchTymeWeatherWidgetEntryView(
                 entry: entry
             )
@@ -274,26 +282,20 @@ struct CrunchTymeWeatherWidget: Widget {
             provider: Provider()
         ) { entry in
 
-            if #available(iOS 17.0, *) {
-
-                CrunchTymeWeatherWidgetFamilyView(
-                    entry: entry
-                )
-                .containerBackground(
-                    .fill.tertiary,
-                    for: .widget
-                )
-
-            } else {
-
-                CrunchTymeWeatherWidgetFamilyView(
-                    entry: entry
-                )
-                .padding()
-                .background()
-            }
+            CrunchTymeWeatherWidgetFamilyView(
+                entry: entry
+            )
+            .containerBackground(
+                WeatherAppearance.background(
+                    for: entry.condition,
+                    isDay: entry.isDay
+                ),
+                for: .widget
+            )
         }
+
         .configurationDisplayName("Weather")
+
         .description(
             "Current weather and sun position."
         )
@@ -309,7 +311,7 @@ struct CrunchTymeWeatherWidget: Widget {
     SimpleEntry(
         date: .now,
         temperature: "28°C",
-        condition: "Mostly Clear",
+        condition: "Sunny",
         location: "Sandton",
         sunrise: .now,
         sunset: .now,

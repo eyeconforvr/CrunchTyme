@@ -82,17 +82,22 @@ struct SunArcView: View {
                 )
 
                 // MARK: - Start Marker
-
                 Image(
                     systemName: isDaytime
                         ? "sunrise.fill"
                         : "moonrise.fill"
                 )
-                .font(.system(size: 16))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(
                     isDaytime
                         ? .orange
-                        : .blue
+                        : .cyan
+                )
+                .shadow(
+                    color: .black.opacity(0.6),
+                    radius: 2,
+                    x: 0,
+                    y: 1
                 )
                 .position(
                     x: centerX - radius,
@@ -100,17 +105,22 @@ struct SunArcView: View {
                 )
 
                 // MARK: - End Marker
-
                 Image(
                     systemName: isDaytime
                         ? "sunset.fill"
                         : "moonset.fill"
                 )
-                .font(.system(size: 16))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(
                     isDaytime
                         ? .orange
-                        : .blue
+                        : .cyan
+                )
+                .shadow(
+                    color: .black.opacity(0.6),
+                    radius: 2,
+                    x: 0,
+                    y: 1
                 )
                 .position(
                     x: centerX + radius,
@@ -125,7 +135,7 @@ struct SunArcView: View {
                         .fill(
                             isDaytime
                                 ? .yellow.opacity(glowAmount)
-                                : .blue.opacity(glowAmount)
+                                : .white.opacity(glowAmount)
                         )
                         .frame(
                             width: 60,

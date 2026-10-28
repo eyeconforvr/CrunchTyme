@@ -106,10 +106,10 @@ struct WidgetSunArcView: View {
 
     private var moonProgress: Double {
 
-        // sunset = 1 → right side
-        // sunrise = 0 → left side
+        // sunset = 0 → left side
+        // sunrise = 1 → right side
 
-        return 1 - nightProgress
+        return nightProgress
     }
 
     // MARK: - Body
@@ -153,8 +153,8 @@ struct WidgetSunArcView: View {
 
                     WidgetArcShape()
                         .trim(
-                            from: moonProgress,
-                            to: 1
+                            from: 0,
+                            to: moonProgress
                         )
                         .stroke(
                             .blue.opacity(0.9),
@@ -267,4 +267,3 @@ struct WidgetSunArcView: View {
         )
     }
 }
-

@@ -10,8 +10,8 @@ import Foundation
 // TODO: GET SPECIFIC FORECAST FOR DAY
 // TODO: CREATE AN ENUM THAT HAS ALL WEATHER CONDITIONS, USE ENUM TO DO SWITCH CASE FOR ICONS
 
-struct WeatherMapper
-{
+struct WeatherMapper {
+
     private static let icons: [String: String] = [
         "Sunny": "sun.max.fill",
         "Clear": "moon.stars.fill",
@@ -30,23 +30,22 @@ struct WeatherMapper
         "Heavy snow": "snowflake",
         "Blizzard": "wind.snow"
     ]
-    
-    
-    
-    static func map(from : WeatherResponse) -> WeatherModel
-    {
-        
+
+    static func map(from: WeatherResponse) -> WeatherModel {
+
         let dailyForecast = from.forecast.forecastday.map { forecastDay in
+
             DailyForecastModel(
                 day: WeatherTimeParser.dayOfWeek(from: forecastDay.date),
                 highTemp: String(forecastDay.day.maxtempC),
                 lowTemp: String(forecastDay.day.mintempC),
-                icon: createIcon(condition: forecastDay.day.condition.text),
+                icon: createIcon(
+                    condition: forecastDay.day.condition.text
+                ),
                 condition: forecastDay.day.condition.text
             )
-            
         }
-        
+
         let calendar = Calendar.current
 
         let currentHour = calendar.date(
@@ -64,9 +63,13 @@ struct WeatherMapper
 
         let hourlyForecast = from.forecast.forecastday
             .flatMap { forecastDay in
+
                 forecastDay.hour
                     .filter { hour in
-                        guard let hourDate = WeatherTimeParser.parseHour(from: hour.time) else {
+
+                        guard let hourDate = WeatherTimeParser.parseHour(
+                            from: hour.time
+                        ) else {
                             return false
                         }
 
@@ -76,31 +79,44 @@ struct WeatherMapper
             }
             .enumerated()
             .map { index, hour in
+
                 HourlyForecastModel(
                     time: index == 0
                         ? "Now"
-                    : WeatherTimeParser.formatHour(from: hour.time),
+                        : WeatherTimeParser.formatHour(
+                            from: hour.time
+                        ),
                     highTemp: String(hour.tempC),
                     lowTemp: String(hour.tempC),
-                    icon: createIcon(condition: hour.condition.text),
+                    icon: createIcon(
+                        condition: hour.condition.text
+                    ),
                     condition: hour.condition.text
                 )
             }
-        
+
         return WeatherModel(
             sunrise: from.forecast.forecastday.first?.astro.sunrise ?? "",
             sunset: from.forecast.forecastday.first?.astro.sunset ?? "",
             currentTemp: String(from.current.tempC),
-            highTemp: String(from.forecast.forecastday.first?.day.maxtempC ?? 0.0),
-            lowTemp: String(from.forecast.forecastday.first?.day.mintempC ?? 0.0),
-            icon: createIcon(condition: from.current.condition.text),
+            highTemp: String(
+                from.forecast.forecastday.first?.day.maxtempC ?? 0.0
+            ),
+            lowTemp: String(
+                from.forecast.forecastday.first?.day.mintempC ?? 0.0
+            ),
+            icon: createIcon(
+                condition: from.current.condition.text
+            ),
             condition: from.current.condition.text,
+            isDay: (from.current.isDay != 0),
             dailyForecast: dailyForecast,
             hourlyForecast: hourlyForecast
         )
     }
-    
+
     private static func createIcon(condition: String) -> String {
         icons[condition] ?? "cloud"
     }
 }
+

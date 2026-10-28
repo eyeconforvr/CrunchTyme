@@ -17,13 +17,9 @@ struct CurrentWeatherHero: View {
 
             // MARK: - Background
 
-            LinearGradient(
-                colors: [
-                    .blue.opacity(0.25),
-                    .clear
-                ],
-                startPoint: .top,
-                endPoint: .bottom
+            WeatherAppearance.background(
+                for: viewModel.weather.condition,
+                isDay: viewModel.weather.isDay
             )
 
             // MARK: - Sun Cycle
@@ -49,38 +45,35 @@ struct CurrentWeatherHero: View {
             VStack {
 
                 HStack {
-                    
-                    
+
                     HStack(spacing: 4) {
+                        
+                        Image(systemName: "arrow.down")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.blue)
 
                         Text(viewModel.weather.lowTemp)
                             .font(.headline)
-                            .fontWeight(.light)
-                            .foregroundStyle(.blue)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.primary)
 
-                        Image(systemName: "arrow.down")
-                            .font(.caption)
-                            .fontWeight(.light)
-                            .foregroundStyle(.blue)
                     }
 
-                            Spacer()
-                    
+                    Spacer()
+
                     HStack(spacing: 4) {
 
                         Image(systemName: "arrow.up")
                             .font(.caption)
-                            .fontWeight(.light)
+                            .fontWeight(.semibold)
                             .foregroundStyle(.orange)
 
                         Text(viewModel.weather.highTemp)
                             .font(.headline)
-                            .fontWeight(.light)
-                            .foregroundStyle(.orange)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.primary)
                     }
-
-
-                    
                 }
 
                 Spacer()
@@ -154,3 +147,4 @@ struct CurrentWeatherHero: View {
         )
     )
 }
+

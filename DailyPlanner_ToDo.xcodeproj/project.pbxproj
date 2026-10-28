@@ -57,8 +57,11 @@
 		EA2D47013074F4D500AE49F8 /* Exceptions for "DailyPlanner_ToDo" folder in "CrunchTymeWeatherWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Domain/DayNameUseCase.swift,
 				Domain/SharedWeatherData.swift,
 				Presentation/Weather/Utilities/WeatherTimeParser.swift,
+				Presentation/Weather/WeatherAppearance.swift,
+				Presentation/Weather/WeatherAtmosphereView.swift,
 			);
 			target = EA999172307391D700EE186A /* CrunchTymeWeatherWidgetExtension */;
 		};
