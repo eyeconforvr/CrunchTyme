@@ -69,11 +69,18 @@ struct RootTabView: View {
                 print("Error fetching weather: \(error)")
             }
         }
+        .onOpenURL { url in
+
+                if url.scheme == "crunchtyme",
+                   url.host == "weather" {
+
+                    selectedTab = .weather
+                }
+            }
     }
 }
 
 // MARK: - Placeholder destination views
-// Replace these with your existing views, or rename your views to match.
 
 struct HomeView: View {
     var taskViewModel = TaskViewModel(filterProtocol: FilterUseCase())

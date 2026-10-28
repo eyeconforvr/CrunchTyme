@@ -19,7 +19,7 @@ class WeatherService:  WeatherServiceProtocol{
     private let baseURL = "https://api.openweathermap.org/data/2.5/weather"
     
     func getWeather(for city: String) async throws -> WeatherResponse {
-        guard let url = URL(string: "http://api.weatherapi.com/v1/forecast.json?key=0ba33315517d4c50b2461546261407&q=Sandton&days=1&aqi=no&alerts=no") else {
+        guard let url = URL(string: "http://api.weatherapi.com/v1/forecast.json?key=0ba33315517d4c50b2461546261407&q=Sandton&days=7&aqi=no&alerts=no") else {
             fatalError("Invalid URL")
         }
         
@@ -29,6 +29,8 @@ class WeatherService:  WeatherServiceProtocol{
               httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
+        
+        print(String(data: data, encoding: .utf8) ?? "No data")
 
         return try JSONDecoder().decode(WeatherResponse.self, from: data)
 
