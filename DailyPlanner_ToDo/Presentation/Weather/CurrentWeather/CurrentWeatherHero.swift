@@ -12,6 +12,19 @@ struct CurrentWeatherHero: View {
     var viewModel: WeatherViewModel
 
     var body: some View {
+        Group {
+            if viewModel.isLoading {
+                WeatherHeroSkeleton()
+            } else {
+                content
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
+    }
+
+    // MARK: - Content
+
+    private var content: some View {
 
         ZStack {
 
@@ -47,7 +60,7 @@ struct CurrentWeatherHero: View {
                 HStack {
 
                     HStack(spacing: 4) {
-                        
+
                         Image(systemName: "arrow.down")
                             .font(.caption)
                             .fontWeight(.semibold)
@@ -147,4 +160,3 @@ struct CurrentWeatherHero: View {
         )
     )
 }
-

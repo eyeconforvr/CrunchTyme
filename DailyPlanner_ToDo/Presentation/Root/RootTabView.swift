@@ -33,6 +33,7 @@ enum AppTab: CaseIterable {
 // MARK: - Root container
 
 struct RootTabView: View {
+    @Environment(LocationService.self) private var location
     @State private var selectedTab: AppTab = .home
     @Query private var tasks: [Task]
     @State private var weatherViewModel = WeatherViewModel(
@@ -62,12 +63,8 @@ struct RootTabView: View {
             }
         }
         .tint(Theme.accent)
-        .task {
-            do {
-                try await weatherViewModel.fetchWeather(city: "Sandton")
-            } catch {
-                print("Error fetching weather: \(error)")
-            }
+        .task(id: location.isGranted) {
+            await loadWeather()
         }
         .onOpenURL { url in
 
@@ -77,8 +74,32 @@ struct RootTabView: View {
                     selectedTab = .weather
                 }
             }
+        
+         
     }
+    func loadWeather() async {
+       var query = "Sandton"   // fallback
+
+       if location.isGranted {
+           do {
+               try await location.requestLocation()
+               if let coordinates = location.coordinateQuery {
+                   query = coordinates
+               }
+           } catch {
+               print("Location unavailable, falling back to Sandton: \(error)")
+           }
+       }
+
+       do {
+           try await weatherViewModel.fetchWeather(city: query)
+       } catch {
+           print("Error fetching weather: \(error)")
+       }
+   }
 }
+
+
 
 // MARK: - Placeholder destination views
 

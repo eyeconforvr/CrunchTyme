@@ -1,4 +1,3 @@
-
 //
 //  MainWeatherView.swift
 //  DailyPlanner_ToDo
@@ -13,6 +12,19 @@ struct WeatherTray: View {
     var viewModel: WeatherViewModel
 
     var body: some View {
+        Group {
+            if viewModel.isLoading {
+                WeatherTraySkeleton()
+            } else {
+                content
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
+    }
+
+    // MARK: - Content
+
+    private var content: some View {
         GeometryReader { geometry in
 
             let availableWidth = geometry.size.width
@@ -286,4 +298,3 @@ struct WeatherTray: View {
     .padding()
     .background(Color("Background"))
 }
-

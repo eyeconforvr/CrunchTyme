@@ -9,6 +9,9 @@ struct TaskView: View {
 
     @State private var isSheetPresented = false
 
+    // Saved by OnboardingView
+    @AppStorage("userName") private var userName = ""
+
     var taskViewModel: TaskViewModel
     var weatherViewModel: WeatherViewModel
 
@@ -16,7 +19,7 @@ struct TaskView: View {
         Date()
     }
 
-    private var greeting: String {
+    private var timeOfDayGreeting: String {
         let hour = Calendar.current.component(.hour, from: currentDate)
 
         switch hour {
@@ -29,9 +32,14 @@ struct TaskView: View {
         }
     }
 
+    private var trimmedName: String {
+        userName.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+
     private var dateText: String {
         currentDate.formatted(
-            .dateTime.weekday(.wide).month(.wide).day()
+            .dateTime.weekday(.abbreviated).month(.abbreviated).day()
         ).uppercased()
     }
 
@@ -45,22 +53,38 @@ struct TaskView: View {
                     HStack(alignment: .center, spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(dateText)
-                                .font(.system(size: 13, weight: .bold))
-                                .tracking(2.5)
+                                .font(.system(size: 12, weight: .bold))
+                                .tracking(1.5)
                                 .foregroundStyle(
                                     Color("Text").opacity(0.5)
                                 )
 
-                            Text("\(greeting), AJ")
-                                .font(.system(
-                                    size: 30,
-                                    weight: .bold,
-                                    design: .rounded
-                                ))
-                                .tracking(-1.2)
-                                .foregroundStyle(Color("Text"))
-                                .minimumScaleFactor(0.8)
-                                .lineLimit(1)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(trimmedName.isEmpty
+                                     ? timeOfDayGreeting
+                                     : "\(timeOfDayGreeting),")
+                                    .font(.system(
+                                        size: trimmedName.isEmpty ? 24 : 18,
+                                        weight: trimmedName.isEmpty ? .bold : .medium,
+                                        design: .rounded
+                                    ))
+                                    .foregroundStyle(
+                                        Color("Text").opacity(trimmedName.isEmpty ? 1 : 0.6)
+                                    )
+
+                                if !trimmedName.isEmpty {
+                                    Text(trimmedName)
+                                        .font(.system(
+                                            size: 24,
+                                            weight: .bold,
+                                            design: .rounded
+                                        ))
+                                        .tracking(-0.5)
+                                        .foregroundStyle(Color("Text"))
+                                        .lineLimit(2)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
                         }
 
                         Spacer(minLength: 4)
@@ -136,4 +160,3 @@ struct TaskView: View {
         )
     )
 }
-
