@@ -10,9 +10,19 @@ import SwiftData
 
 @main
 struct DailyPlanner_ToDoApp: App {
+    @State private var locationService = LocationService()
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+
     var body: some Scene {
         WindowGroup {
-            RootTabView()
-        }.modelContainer(for: Task.self)
+            Group {
+                if hasCompletedOnboarding {
+                    RootTabView()
+                } else {
+                    OnboardingView()
+                }
+            }
+            .environment(locationService)   
+        }
     }
 }

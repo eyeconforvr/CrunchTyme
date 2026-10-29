@@ -20,7 +20,15 @@ class WeatherViewModel {
 
     var weather: WeatherModel = WeatherModel()
 
+    /// True until the first fetch finishes (success or failure). Starts
+    /// true so the skeleton shows while the location and weather load.
+    /// Later refreshes keep showing the existing data instead of
+    /// flashing the skeleton again.
+    var isLoading = true
+
     func fetchWeather(city: String) async throws {
+
+        defer { isLoading = false }
 
         weather = try await weatherRepository.getWeather(for: city)
 
@@ -43,8 +51,8 @@ class WeatherViewModel {
             }
         )
         WeatherDataStore.save(sharedWeather)
-        
-        WidgetCenter.shared.reloadTimelines( ofKind: "CrunchTymeWeatherWidget" )
+
+        WidgetCenter.shared.reloadTimelines(ofKind: "CrunchTymeWeatherWidget")
     }
 
 }

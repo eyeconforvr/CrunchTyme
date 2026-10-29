@@ -408,6 +408,8 @@
 				INFOPLIST_FILE = CrunchTymeWeatherWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = CrunchTymeWeatherWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location lets us show the weather where you actually are.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location lets us show the weather where you actually are.";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -440,6 +442,8 @@
 				INFOPLIST_FILE = CrunchTymeWeatherWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = CrunchTymeWeatherWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location lets us show the weather where you actually are.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location lets us show the weather where you actually are.";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
