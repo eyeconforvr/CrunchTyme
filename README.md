@@ -61,6 +61,7 @@ Home greets you by name and time of day, shows the current date and weather summ
 
 <!-- TODO: add screenshot for Home Dashboard -->
 ![Home Dashboard screenshot](docs/images/home-dashboard-1.png)
+![Home Dashboard screenshot](docs/images/home-dashboard-2.png)
 
 ### Task creation and local persistence
 
