@@ -36,7 +36,7 @@ A five-step flow introduces the app, collects a first name, offers location perm
 **Demo:** Record first launch, enter a name, show the location choice, and finish onboarding.
 
 <!-- TODO: add demo video for Onboarding -->
-[▶ Watch the Onboarding demo](docs/videos/onboarding.mp4)
+[▶ Watch the Onboarding demo](docs/videos/onboarding.mov)
 
 <!-- TODO: add screenshot for Onboarding -->
 ![Onboarding screenshot](docs/images/onboarding-1.png)
@@ -57,7 +57,7 @@ Home greets you by name and time of day, shows the current date and weather summ
 **Demo:** Switch filters, complete and reopen a task, and show the changing progress summary.
 
 <!-- TODO: add demo video for Home Dashboard -->
-[▶ Watch the Home Dashboard demo](docs/videos/home-dashboard.mp4)
+[▶ Watch the Home Dashboard demo](docs/videos/home-dashboard.mov)
 
 <!-- TODO: add screenshot for Home Dashboard -->
 ![Home Dashboard screenshot](docs/images/home-dashboard-1.png)
@@ -73,7 +73,7 @@ The plus button on Home or Calendar opens a task sheet. Enter a title, descripti
 **Demo:** Create a task, find it on Home and Calendar, then relaunch to demonstrate persistence.
 
 <!-- TODO: add demo video for Task Creation -->
-[▶ Watch the Task Creation demo](docs/videos/task-creation.mp4)
+[▶ Watch the Task Creation demo](docs/videos/task-creation.mov)
 
 <!-- TODO: add screenshot for Task Creation -->
 ![Task Creation screenshot](docs/images/task-creation-1.png)
@@ -89,7 +89,7 @@ Browse horizontally paged, Monday-first weeks and select a day to see its tasks 
 **Demo:** Page through weeks, select days with and without tasks, and show a scheduled day's timeline.
 
 <!-- TODO: add demo video for Calendar Timeline -->
-[▶ Watch the Calendar Timeline demo](docs/videos/calendar-timeline.mp4)
+[▶ Watch the Calendar Timeline demo](docs/videos/calendar-timeline.mov)
 
 <!-- TODO: add screenshot for Calendar Timeline -->
 ![Calendar Timeline screenshot](docs/images/calendar-timeline-1.png)
@@ -105,7 +105,7 @@ The Weather tab displays temperature in Celsius, conditions, daily high/low temp
 **Demo:** Show the Home weather summary, open Weather, and switch daily/hourly forecasts. Identify static detail tiles as placeholders.
 
 <!-- TODO: add demo video for Weather Dashboard -->
-[▶ Watch the Weather Dashboard demo](docs/videos/weather-dashboard.mp4)
+[▶ Watch the Weather Dashboard demo](docs/videos/weather-dashboard.mov)
 
 <!-- TODO: add screenshots for Weather Dashboard -->
 ![Weather Dashboard screenshot](docs/images/weather-dashboard-1.png)
@@ -122,7 +122,7 @@ The widget reads the last weather snapshot saved by the app and presents tempera
 **Demo:** Fetch weather in the app, add the widget to the Home Screen, and show its saved weather and sun arc.
 
 <!-- TODO: add demo video for Weather Widget -->
-[▶ Watch the Weather Widget demo](docs/videos/weather-widget.mp4)
+[▶ Watch the Weather Widget demo](docs/videos/weather-widget.mov)
 
 <!-- TODO: add screenshot for Weather Widget -->
 ![Weather Widget screenshot](docs/images/weather-widget-1.png)
