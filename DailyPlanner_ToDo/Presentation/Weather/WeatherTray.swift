@@ -46,7 +46,7 @@ struct WeatherTray: View {
                     VStack(alignment: .leading, spacing: 12) {
 
                         Label(
-                            "Sandton",
+                            viewModel.weather.locationName,
                             systemImage: "location"
                         )
                         .font(.system(

@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct WeatherInfoTilesView: View {
+    var humidity: Double? = nil
 
     var body: some View {
         HStack(spacing: 10) {
            
                 AirQualityTile()
 
-                HumidityTile()
+                HumidityTile(humidity: humidity)
             
         }
     }

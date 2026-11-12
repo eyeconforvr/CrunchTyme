@@ -40,13 +40,15 @@ struct WidgetMediumView: View {
 
                 // MARK: - Sun Arc
 
-                WidgetSunArcView(
-                    sunrise: entry.sunrise,
-                    sunset: entry.sunset,
-                    currentTime: entry.date,
-                    height: 55,
-                    sunSize: 18
-                )
+                if entry.hasSunTimes {
+                    WidgetSunArcView(
+                        sunrise: entry.sunrise,
+                        sunset: entry.sunset,
+                        currentTime: entry.date,
+                        height: 55,
+                        sunSize: 18
+                    )
+                }
 
                 // MARK: - Sunrise / Sunset
 
@@ -58,10 +60,7 @@ struct WidgetMediumView: View {
                             .font(.caption2)
 
                         Text(
-                            entry.sunrise.formatted(
-                                date: .omitted,
-                                time: .shortened
-                            )
+                            entry.sunriseLabel
                         )
                         .font(.caption2)
                     }
@@ -71,10 +70,7 @@ struct WidgetMediumView: View {
                     HStack(spacing: 3) {
 
                         Text(
-                            entry.sunset.formatted(
-                                date: .omitted,
-                                time: .shortened
-                            )
+                            entry.sunsetLabel
                         )
                         .font(.caption2)
 

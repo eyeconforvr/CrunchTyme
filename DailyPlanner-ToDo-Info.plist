@@ -6,10 +6,5 @@
 	<string>Your location lets us show the weather where you actually are.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location lets us show the weather where you actually are.</string>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 </dict>
 </plist>

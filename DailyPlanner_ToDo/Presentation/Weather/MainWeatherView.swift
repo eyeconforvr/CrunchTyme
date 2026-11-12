@@ -25,7 +25,7 @@ struct MainWeatherScreen: View {
                     viewModel: weatherViewModel
                 )
 
-                WeatherInfoTilesView()
+                WeatherInfoTilesView(humidity: weatherViewModel.weather.metrics.humidity)
             }
             .padding(.horizontal, 10)
         }

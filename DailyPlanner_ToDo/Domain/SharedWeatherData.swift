@@ -16,6 +16,10 @@ struct SharedWeatherData: Codable {
     let sunrise: String
     let sunset: String
     let dailyForecast: [SharedDailyForecast]
+    var locationName: String?
+    var timeZoneIdentifier: String?
+    var sunriseDate: Date?
+    var sunsetDate: Date?
 }
 
 struct SharedDailyForecast: Codable {

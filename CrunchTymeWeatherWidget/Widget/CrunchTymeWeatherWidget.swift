@@ -57,7 +57,8 @@ struct Provider: TimelineProvider {
                 location: "Sandton",
                 sunrise: currentDate,
                 sunset: currentDate,
-                dailyForecast: []
+                dailyForecast: [],
+                hasSunTimes: false
             )
 
             let timeline = Timeline(
@@ -75,18 +76,18 @@ struct Provider: TimelineProvider {
             return
         }
 
+        let sunrise = weather.sunriseDate ?? WeatherTimeParser.date(from: weather.sunrise)
+        let sunset = weather.sunsetDate ?? WeatherTimeParser.date(from: weather.sunset)
         let entry = SimpleEntry(
             date: currentDate,
             temperature: weather.currentTemp,
             condition: weather.condition,
-            location: "Sandton",
-            sunrise: WeatherTimeParser.date(
-                from: weather.sunrise
-            ) ?? currentDate,
-            sunset: WeatherTimeParser.date(
-                from: weather.sunset
-            ) ?? currentDate,
-            dailyForecast: weather.dailyForecast
+            location: weather.locationName ?? "Sandton",
+            sunrise: sunrise ?? currentDate,
+            sunset: sunset ?? currentDate,
+            dailyForecast: weather.dailyForecast,
+            timeZoneIdentifier: weather.timeZoneIdentifier,
+            hasSunTimes: sunrise != nil && sunset != nil
         )
 
         let timeline = Timeline(
@@ -113,6 +114,19 @@ struct SimpleEntry: TimelineEntry {
     let sunrise: Date
     let sunset: Date
     let dailyForecast: [SharedDailyForecast]
+    var timeZoneIdentifier: String? = nil
+    var hasSunTimes = true
+
+    var sunriseLabel: String { timeLabel(sunrise) }
+    var sunsetLabel: String { timeLabel(sunset) }
+
+    private func timeLabel(_ date: Date) -> String {
+        guard hasSunTimes else { return "--" }
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.timeZone = TimeZone(identifier: timeZoneIdentifier ?? "") ?? .current
+        return formatter.string(from: date)
+    }
 
     // MARK: - Day / Night
 
@@ -153,13 +167,15 @@ struct CrunchTymeWeatherWidgetEntryView: View {
 
             // MARK: - Sun Arc
 
-            WidgetSunArcView(
-                sunrise: entry.sunrise,
-                sunset: entry.sunset,
-                currentTime: entry.date,
-                height: 75,
-                sunSize: 20
-            )
+            if entry.hasSunTimes {
+                WidgetSunArcView(
+                    sunrise: entry.sunrise,
+                    sunset: entry.sunset,
+                    currentTime: entry.date,
+                    height: 75,
+                    sunSize: 20
+                )
+            }
 
             // MARK: - Sunrise / Sunset
 
@@ -171,10 +187,7 @@ struct CrunchTymeWeatherWidgetEntryView: View {
                         .font(.caption2)
 
                     Text(
-                        entry.sunrise.formatted(
-                            date: .omitted,
-                            time: .shortened
-                        )
+                        entry.sunriseLabel
                     )
                     .font(.caption2)
                 }
@@ -184,10 +197,7 @@ struct CrunchTymeWeatherWidgetEntryView: View {
                 HStack(spacing: 4) {
 
                     Text(
-                        entry.sunset.formatted(
-                            date: .omitted,
-                            time: .shortened
-                        )
+                        entry.sunsetLabel
                     )
                     .font(.caption2)
 
