@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-// MARK: - Card color palette (cycled per task, not tied to task data)
+
 
 struct TaskColorSet {
     let background: Color
@@ -121,7 +121,8 @@ struct CalendarView<Task: CalendarTask>: View {
                 AddTaskView()
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
-            }        }
+            }
+        }
     }
 
     // MARK: Week strip

@@ -31,6 +31,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EAAAB4DF30061DB800518414"
                BuildableName = "DailyPlanner_ToDo.app"
+               BlueprintName = "DailyPlanner_ToDo"
                ReferencedContainer = "container:DailyPlanner_ToDo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -71,6 +72,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EAAAB4DF30061DB800518414"
             BuildableName = "DailyPlanner_ToDo.app"
+            BlueprintName = "DailyPlanner_ToDo"
             ReferencedContainer = "container:DailyPlanner_ToDo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -106,6 +108,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EAAAB4DF30061DB800518414"
             BuildableName = "DailyPlanner_ToDo.app"
+            BlueprintName = "DailyPlanner_ToDo"
             ReferencedContainer = "container:DailyPlanner_ToDo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
