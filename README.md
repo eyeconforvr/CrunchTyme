@@ -9,7 +9,7 @@
 
 CrunchTyme is a native iPhone and iPad daily planner built with SwiftUI. It brings locally stored tasks, a weekly calendar with a daily timeline, and weather information into one app, helping you review what needs doing and when. A companion WidgetKit extension displays a saved weather snapshot outside the app.
 
-The Xcode project and app target are named `DailyPlanner_ToDo`; the configured display name is **CrunchTyme**. This is a work in progress: Settings and air-quality details are placeholders. Weather is provided by Open-Meteo using the current coordinates, with Sandton as the fallback when location is unavailable.
+The Xcode project and app target are named `DailyPlanner_ToDo`; the configured display name is **CrunchTyme**. This is a work in progress: Settings and some weather details are currently placeholders.
 
 ## Contents
 
@@ -84,7 +84,7 @@ Browse horizontally paged, Monday-first weeks and select a day to see its tasks 
 
 **Technologies and patterns:** generic `CalendarView<Task: CalendarTask>`, a protocol adapter on the persisted task model, observable `CalendarViewModel`, Foundation calendar calculations, and SwiftUI scroll paging.
 
-**Current scope:** the header's back button has an empty action. Changing the selected date currently prints task/date diagnostics to the console.
+**Current scope:** the header's back button has an empty action.
 
 **Demo:** Page through weeks, select days with and without tasks, and show a scheduled day's timeline.
 
@@ -100,7 +100,7 @@ The Weather tab displays temperature in Celsius, conditions, daily high/low temp
 
 **Technologies and patterns:** `URLSession` with `async/await`, `Codable` responses, service/repository protocols, a response-to-domain mapper, shared observable weather state, SF Symbols, condition/day-night gradients, and timer-driven sun-cycle rendering.
 
-**Current scope:** Open-Meteo supplies seven days of forecasts without an API key for standard non-commercial access. City queries use its geocoding API; coordinate queries go directly to the forecast endpoint. Humidity uses current weather data, while Air Quality (“Good”) remains a static example. Feels-like temperature, precipitation, and wind speed are available in the application model without adding new UI layouts. Fetch failures are logged without a dedicated error/retry screen. Additional atmosphere drawing components exist in source but are not wired into the current weather hero.
+**Current scope:** the request asks WeatherAPI for seven days; the displayed forecast depends on returned data. Air Quality (“Good”) and Humidity (“62%”) tiles are static examples. Fetch failures are logged without a dedicated error/retry screen. Additional atmosphere drawing components exist in source but are not wired into the current weather hero.
 
 **Demo:** Show the Home weather summary, open Weather, and switch daily/hourly forecasts. Identify static detail tiles as placeholders.
 
@@ -117,7 +117,7 @@ The widget reads the last weather snapshot saved by the app and presents tempera
 
 **Technologies and patterns:** WidgetKit `StaticConfiguration` and `TimelineProvider`, shared `Codable` payloads, App Group `UserDefaults`, and `WidgetCenter` reloads after successful app fetches. The provider requests another timeline after 30 minutes; it rereads saved data rather than fetching weather itself. iOS controls actual refresh timing.
 
-**Current scope:** snapshots include the requested location label, timezone, and absolute sunrise/sunset dates. Older snapshots remain readable. The basic layout declares `crunchtyme://weather`, and the app handles that URL to select Weather, but no URL-scheme registration is present in the app configuration. The larger layouts do not declare that widget URL. Families are not explicitly restricted with `supportedFamilies`; verify available layouts on the intended device and OS.
+**Current scope:** The basic layout declares `crunchtyme://weather`, and the app handles that URL to select Weather, but no URL-scheme registration is present in the app configuration. The larger layouts do not declare that widget URL. Families are not explicitly restricted with `supportedFamilies`; verify available layouts on the intended device and OS.
 
 **Demo:** Fetch weather in the app, add the widget to the Home Screen, and show its saved weather and sun arc.
 
@@ -129,7 +129,7 @@ The widget reads the last weather snapshot saved by the app and presents tempera
 
 ### Other screens and implementation status
 
-The tab bar contains Home, Calendar, Weather, and Settings. **Settings currently displays only a title and icon.** Separate Air Quality and Humidity detail views are placeholders. No backend server, user authentication, cloud task synchronization, or notification scheduling is implemented.
+The tab bar contains Home, Calendar, Weather, and Settings. **Settings currently displays only a title and icon.** Separate Air Quality and Humidity detail views are placeholders. No backend server, user authentication, cloud task synchronization, or notification scheduling is implemented, however notification scheduling and user profiles are planned for the future.
 
 <!-- TODO: add a Settings feature demo when functional settings are implemented. -->
 
@@ -154,7 +154,7 @@ There are no declared third-party Swift Package, CocoaPods, or Carthage dependen
 
 ## Architecture
 
-The app uses component-based SwiftUI views with MVVM-style view models and `Data`, `Domain`, and `Presentation` folders. Weather and task filtering use protocol-based dependency injection. These are organizational layers rather than separate Swift packages: task views and their view model access SwiftData directly.
+The app uses component-based SwiftUI views with MVVM-style view models and `Data`, `Domain`, and `Presentation` folders. Weather and task filtering use protocol-based dependency injection. These are organizational layers rather than separate Swift packages: task views and their view model access SwiftData directly, however a repository is planned to be implemented as a layer between these concerns.
 
 ```text
 DailyPlanner_ToDo/
