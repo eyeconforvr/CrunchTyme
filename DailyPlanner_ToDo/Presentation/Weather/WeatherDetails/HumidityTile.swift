@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HumidityTile: View {
+    var humidity: Double? = nil
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: "humidity")
@@ -17,7 +18,7 @@ struct HumidityTile: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Text("62%")
+            Text(humidity.map { String(format: "%.0f%%", $0) } ?? "--")
                 .font(.headline)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

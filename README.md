@@ -9,7 +9,7 @@
 
 CrunchTyme is a native iPhone and iPad daily planner built with SwiftUI. It brings locally stored tasks, a weekly calendar with a daily timeline, and weather information into one app, helping you review what needs doing and when. A companion WidgetKit extension displays a saved weather snapshot outside the app.
 
-The Xcode project and app target are named `DailyPlanner_ToDo`; the configured display name is **CrunchTyme**. This is a work in progress: Settings and some weather details are placeholders, and the weather service currently requests Sandton regardless of the location passed to it.
+The Xcode project and app target are named `DailyPlanner_ToDo`; the configured display name is **CrunchTyme**. This is a work in progress: Settings and air-quality details are placeholders. Weather is provided by Open-Meteo using the current coordinates, with Sandton as the fallback when location is unavailable.
 
 ## Contents
 
@@ -100,7 +100,7 @@ The Weather tab displays temperature in Celsius, conditions, daily high/low temp
 
 **Technologies and patterns:** `URLSession` with `async/await`, `Codable` responses, service/repository protocols, a response-to-domain mapper, shared observable weather state, SF Symbols, condition/day-night gradients, and timer-driven sun-cycle rendering.
 
-**Current scope:** the request asks WeatherAPI for seven days; the displayed forecast depends on returned data. `WeatherService` ignores its city argument and always requests Sandton; the Home location label is also fixed. Air Quality (“Good”) and Humidity (“62%”) tiles are static examples. Fetch failures are logged without a dedicated error/retry screen. Additional atmosphere drawing components exist in source but are not wired into the current weather hero.
+**Current scope:** Open-Meteo supplies seven days of forecasts without an API key for standard non-commercial access. City queries use its geocoding API; coordinate queries go directly to the forecast endpoint. Humidity uses current weather data, while Air Quality (“Good”) remains a static example. Feels-like temperature, precipitation, and wind speed are available in the application model without adding new UI layouts. Fetch failures are logged without a dedicated error/retry screen. Additional atmosphere drawing components exist in source but are not wired into the current weather hero.
 
 **Demo:** Show the Home weather summary, open Weather, and switch daily/hourly forecasts. Identify static detail tiles as placeholders.
 
@@ -117,7 +117,7 @@ The widget reads the last weather snapshot saved by the app and presents tempera
 
 **Technologies and patterns:** WidgetKit `StaticConfiguration` and `TimelineProvider`, shared `Codable` payloads, App Group `UserDefaults`, and `WidgetCenter` reloads after successful app fetches. The provider requests another timeline after 30 minutes; it rereads saved data rather than fetching weather itself. iOS controls actual refresh timing.
 
-**Current scope:** the location is fixed to Sandton. The basic layout declares `crunchtyme://weather`, and the app handles that URL to select Weather, but no URL-scheme registration is present in the app configuration. The larger layouts do not declare that widget URL. Families are not explicitly restricted with `supportedFamilies`; verify available layouts on the intended device and OS.
+**Current scope:** snapshots include the requested location label, timezone, and absolute sunrise/sunset dates. Older snapshots remain readable. The basic layout declares `crunchtyme://weather`, and the app handles that URL to select Weather, but no URL-scheme registration is present in the app configuration. The larger layouts do not declare that widget URL. Families are not explicitly restricted with `supportedFamilies`; verify available layouts on the intended device and OS.
 
 **Demo:** Fetch weather in the app, add the widget to the Home Screen, and show its saved weather and sun arc.
 
@@ -142,7 +142,7 @@ The tab bar contains Home, Calendar, Weather, and Settings. **Settings currently
 | State and navigation | Observation (`@Observable`), `@State`, `@Environment`, `@AppStorage`, `NavigationStack`, `TabView` |
 | Local storage | SwiftData for tasks; UserDefaults for onboarding and widget snapshots |
 | Networking | Foundation `URLSession`, `async/await`, `JSONDecoder`, `Codable` |
-| External service | WeatherAPI forecast endpoint; no project backend |
+| External service | [Open-Meteo forecast and geocoding APIs](https://open-meteo.com/en/docs); no project backend |
 | Location | Core Location, one-shot requests, when-in-use authorization |
 | Widgets | WidgetKit, App Groups, shared models and storage |
 | Timers | Combine timer publisher for sun-cycle updates |
@@ -150,7 +150,7 @@ The tab bar contains Home, Calendar, Weather, and Settings. **Settings currently
 | Build and distribution | Xcode project, shared schemes, `xcodebuild`, automatic code signing |
 | Authentication | No user authentication implemented |
 
-There are no declared third-party Swift Package, CocoaPods, or Carthage dependencies. An unused OpenWeatherMap base URL remains in `WeatherService`; the actual request uses WeatherAPI.
+There are no declared third-party Swift Package, CocoaPods, or Carthage dependencies. Weather requests use HTTPS and require no embedded credentials.
 
 ## Architecture
 
@@ -168,7 +168,8 @@ DailyPlanner_ToDo/
 │   ├── Data/
 │   │   ├── Model/                   # SwiftData Task and weather response models
 │   │   ├── Network/WeatherService.swift
-│   │   └── WeatherMapper.swift
+│   │   ├── WeatherMapper.swift
+│   │   └── WeatherConditionMapper.swift
 │   ├── Domain/                      # Protocols, use cases, weather/shared models
 │   ├── Presentation/
 │   │   ├── Root/                    # Tab navigation and placeholder Settings
@@ -187,13 +188,13 @@ DailyPlanner_ToDo/
 │   ├── Assets.xcassets/
 │   └── Info.plist
 ├── CrunchTymeWeatherWidgetExtension.entitlements
-├── DailyPlanner_ToDoTests/           # Weather mock smoke test
+├── DailyPlanner_ToDoTests/           # Weather networking, mapping and snapshot tests
 └── ToDoApp/.gitattributes            # Line-ending configuration only
 ```
 
 **App lifecycle:** `DailyPlanner_ToDoApp` supplies the task model container and location service, then chooses onboarding or `RootTabView` using the stored onboarding flag. The root owns a weather view model shared by Home and Weather and loads weather when location authorization changes.
 
-**Weather flow:** view → `WeatherViewModel` → `WeatherRepositoryProtocol` → `WeatherServiceProtocol` → WeatherAPI. `WeatherMapper` converts decoded responses into display models. After a successful fetch, the view model saves `SharedWeatherData` and asks WidgetKit to reload.
+**Weather flow:** view → `WeatherViewModel` → `WeatherRepositoryProtocol` → `WeatherServiceProtocol` → Open-Meteo. `WeatherMapper`, called by the repository, converts provider-specific DTOs into the existing application models. `WeatherConditionMapper` groups WMO codes into the condition strings and SF Symbols already consumed by the views. Optional measurements use °C, %, mm, and km/h. Forecast dates are decoded as Unix timestamps and formatted in the returned location timezone. After a successful fetch, the view model saves `SharedWeatherData` and asks WidgetKit to reload.
 
 **Task flow:** `AddTaskView` → `TaskViewModel` → SwiftData `ModelContext`. Queries supply tasks to Home and Calendar; `FilterUseCase` selects categories, while `CalendarViewModel` filters and sorts by day.
 
@@ -204,9 +205,9 @@ DailyPlanner_ToDo/
 ### Prerequisites
 
 - A Mac with Xcode and an iOS SDK/runtime supporting the checked-in deployment targets.
-- The app currently inherits **iOS 26.5** from the project. Tests declare iOS 26.0 and the widget declares iOS 18.6; the app's higher minimum still governs installation of the app and its embedded widget.
+- The app currently inherits **iOS 26.5** from the project. Tests declare iOS 26.5 and the widget declares iOS 18.6; the app's higher minimum still governs installation of the app and its embedded widget.
 - A compatible iPhone/iPad simulator or device.
-- A WeatherAPI credential for live weather requests.
+- Internet access for Open-Meteo forecast requests and city geocoding; no API key is required for standard free non-commercial access.
 - For device builds/distribution, an Apple development team with signing and App Group provisioning.
 
 <!-- TODO: document the minimum tested Xcode version and align deployment targets after verifying API availability. -->
@@ -222,19 +223,18 @@ Open `DailyPlanner_ToDo.xcodeproj` in Xcode. No separate dependency installation
 
 ### Configuration and environment variables
 
-**The app reads no application environment variables and has no `.env` loader or `.xcconfig` credential setup.** Setting a weather environment variable alone will not change the request.
+**No application environment variables or API keys are required.** The service uses Open-Meteo’s standard public HTTPS endpoints. See the [forecast documentation](https://open-meteo.com/en/docs) and [geocoding documentation](https://open-meteo.com/en/docs/geocoding-api) for parameters and service terms.
 
 | Configuration | Current behavior / setup |
 | --- | --- |
-| Weather credential | `DailyPlanner_ToDo/Data/Network/WeatherService.swift` embeds a credential in both a constant and the actual request URL. Replace the request's credential with your own for local testing; changing the unused constant alone has no effect. Do not commit credentials. |
-| Weather location | The URL uses a fixed Sandton query. The service does not use its `city` parameter or coordinates yet. |
+| Weather provider | `WeatherService` requests Open-Meteo over HTTPS; the prior embedded credential has been removed. |
+| Weather location | The existing `city` argument accepts a city name or `latitude,longitude`. City names are geocoded; location permission handling and the Sandton fallback remain in `RootTabView`. |
 | Location permissions | The root `DailyPlanner-ToDo-Info.plist` contains usage descriptions; the service requests when-in-use permission. |
 | App Group | Both entitlement files and `WeatherDataStore.suiteName` must use the same group registered for your team. The current identifier is `group.com.alfrxdjr.DailyPlanner-ToDo`. |
 | Signing | Select your team under Signing & Capabilities for the app and widget; adjust bundle identifiers and provisioning as needed. |
 | Widget debugging | The widget scheme defines `_XCWidgetKind`, `_XCWidgetDefaultView`, and `_XCWidgetFamily`. These are Xcode launch settings, not application credentials. |
 
-<!-- TODO: rotate the embedded WeatherAPI credential and move credential configuration out of committed source. Document its actual configuration name and setup once implemented. -->
-<!-- TODO: construct an HTTPS WeatherAPI request using the supplied city/coordinates, then remove the broad NSAllowsArbitraryLoads exception. -->
+<!-- TODO: revoke the former provider credential if it remains active; removing it from source does not invalidate copies in Git history. -->
 <!-- TODO: register the crunchtyme URL scheme and verify widget-to-weather navigation. -->
 
 ### Run locally
@@ -242,14 +242,14 @@ Open `DailyPlanner_ToDo.xcodeproj` in Xcode. No separate dependency installation
 1. Select the **DailyPlanner_ToDo** scheme.
 2. Choose a compatible iPhone or iPad simulator/device.
 3. Build and run with **⌘R**.
-4. Complete onboarding. Allow or defer location access; weather currently remains fixed to Sandton either way.
+4. Complete onboarding. Allow location access to request local weather, or defer it to use the Sandton fallback.
 5. Create a task from Home or Calendar. After a successful weather fetch, add the Weather widget from the widget gallery, or use the **CrunchTymeWeatherWidgetExtension** scheme to debug it.
 
 Tasks and onboarding preferences use local storage, so task planning does not depend on weather requests succeeding. Reinstalling the app in a simulator provides fresh onboarding but also removes that installation's local tasks and preferences.
 
 ## Testing
 
-`DailyPlanner_ToDoTests` contains one XCTest smoke test, `WeatherXCTests.testFetchWeather`. It calls a mock repository and asserts that the returned model is non-nil. It does **not** exercise the weather view model, live API, decoding, task persistence, filters, calendar, or widgets.
+`DailyPlanner_ToDoTests` includes the original weather mock smoke test and `OpenMeteoWeatherTests`. Deterministic tests use a stub `URLProtocol` to verify city/coordinate requests, HTTP/decoding/network failures, WMO mappings, optional forecast values, timezone formatting, repository output, view-model state, and App Group snapshot compatibility. They do not require a live API connection. Task persistence, task filters, calendar behavior, and widget visual layouts still need dedicated coverage.
 
 In Xcode, select **DailyPlanner_ToDo** or **DailyPlanner_ToDoTests** and use **⌘U**. The dedicated test scheme references `DailyPlanner_ToDo/DailyPlanner_ToDoTests.xctestplan`.
 
@@ -271,7 +271,7 @@ xcodebuild test \
 
 No CI workflow, dedicated UI test target, or lint configuration is included.
 
-<!-- TODO: add meaningful tests for weather mapping/failures, task filters/persistence, calendar date boundaries, and widget storage. -->
+<!-- TODO: add tests for task filters/persistence, calendar date boundaries, and widget visual layouts. -->
 
 ## Deployment
 
@@ -280,7 +280,7 @@ The app embeds `CrunchTymeWeatherWidgetExtension`. Shared schemes use Release fo
 For a manual distribution build:
 
 1. Configure your team, bundle identifiers, and matching App Group capabilities for the app and widget.
-2. Resolve weather configuration and release-blocking implementation gaps. Supply final app icon artwork; the checked-in app icon catalog is not populated.
+2. Review provider terms and resolve release-blocking implementation gaps. Supply final app icon artwork; the checked-in app icon catalog is not populated.
 3. Select **DailyPlanner_ToDo**, choose an appropriate device build destination, and use **Product → Archive**.
 4. Use Xcode Organizer to validate and distribute through your chosen Apple distribution method, subject to account and provisioning setup.
 
@@ -290,10 +290,11 @@ For a manual distribution build:
 
 These items reflect current implementation gaps, not committed release dates.
 
-- [ ] Rotate the embedded weather credential and move it out of source.
-- [ ] Use HTTPS and the supplied location/city; replace fixed location labels.
-- [ ] Verify WeatherAPI decoding and forecast availability with real responses.
-- [ ] Connect humidity and air-quality tiles to real data, or label unavailable data.
+- [x] Replace the credential-based weather service with Open-Meteo over HTTPS.
+- [x] Support city/coordinate queries and preserve existing models through DTO mapping.
+- [x] Add WMO, networking, mapping, and widget snapshot tests.
+- [x] Connect humidity to current weather data.
+- [ ] Connect air-quality tiles to real data, or label unavailable data.
 - [ ] Add visible weather errors and retry controls.
 - [ ] Expose task editing/deletion; add form validation and save feedback.
 - [ ] Implement Settings; resolve the inactive calendar header action and diagnostic logging.
