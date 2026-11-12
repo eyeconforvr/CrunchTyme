@@ -83,14 +83,14 @@ struct WeatherBackgroundView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Layer 1: Rich atmospheric gradient
+
                 LinearGradient(
                     colors: gradientColors,
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
 
-                // Layer 2: Soft ambient lighting
+                
                 RadialGradient(
                     colors: [
                         glowColor.opacity(isDay ? 0.24 : 0.16),
@@ -101,7 +101,7 @@ struct WeatherBackgroundView: View {
                     endRadius: geometry.size.width * 1.1
                 )
 
-                // Layer 3: Fine grain texture
+               
                 Image("WeatherNoise")
                     .resizable(resizingMode: .tile)
                     .interpolation(.low)

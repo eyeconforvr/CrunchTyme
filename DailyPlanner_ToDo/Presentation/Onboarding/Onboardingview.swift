@@ -173,8 +173,7 @@ struct OnboardingView: View {
                         )
                         .onSubmit { advance() }
                         .onAppear {
-                            // Wait for the page transition to finish so
-                            // the keyboard doesn't fight the animation.
+                           
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                                 nameFocused = true
                             }

@@ -36,6 +36,9 @@ struct RootTabView: View {
     @Environment(LocationService.self) private var location
     @State private var selectedTab: AppTab = .home
     @Query private var tasks: [Task]
+    @Environment(\.modelContext) private var context
+    @State private var editingTask: Task?
+    @State private var taskViewModel = TaskViewModel(filterProtocol: FilterUseCase())
     @State private var weatherViewModel = WeatherViewModel(
         weatherRepository: WeatherRepository(
             weatherService: WeatherService()
@@ -49,7 +52,14 @@ struct RootTabView: View {
             }
 
             Tab(AppTab.calendar.label, systemImage: AppTab.calendar.icon, value: AppTab.calendar) {
-                CalendarView(tasks: tasks)
+                CalendarView(
+                    tasks: tasks,
+                    onDelete: { try taskViewModel.deleteTask($0, context: context) },
+                    onEdit: { editingTask = $0 }
+                )
+                .sheet(item: $editingTask) { task in
+                    AddTaskView(taskToEdit: task)
+                }
             }
 
             Tab(AppTab.weather.label, systemImage: AppTab.weather.icon, value: AppTab.weather) {
@@ -78,25 +88,27 @@ struct RootTabView: View {
          
     }
     func loadWeather() async {
-       var query = "Sandton"   // fallback
+        var query = "Sandton" // Only used when device coordinates are unavailable.
 
-       if location.isGranted {
-           do {
-               try await location.requestLocation()
-               if let coordinates = location.coordinateQuery {
-                   query = coordinates
-               }
-           } catch {
-               print("Location unavailable, falling back to Sandton: \(error)")
-           }
-       }
+        if location.isGranted {
+            do {
+                try await location.requestLocation()
+            } catch {
+                // A failed refresh must not discard a location already supplied by the device.
+                print("Location refresh unavailable: \(error)")
+            }
+            query = location.coordinateQuery ?? query
+        }
 
-       do {
-           try await weatherViewModel.fetchWeather(city: query)
-       } catch {
-           print("Error fetching weather: \(error)")
-       }
-   }
+        guard !_Concurrency.Task.isCancelled else { return }
+        do {
+            try await weatherViewModel.fetchWeather(city: query)
+        } catch is CancellationError {
+            return
+        } catch {
+            print("Error fetching weather: \(error)")
+        }
+    }
 }
 
 
