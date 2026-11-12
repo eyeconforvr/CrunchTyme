@@ -13,6 +13,7 @@ import WidgetKit
 class WeatherViewModel {
 
     private let weatherRepository: WeatherRepositoryProtocol
+    private var fetchGeneration = 0
 
     init(weatherRepository: WeatherRepositoryProtocol) {
         self.weatherRepository = weatherRepository
@@ -24,9 +25,16 @@ class WeatherViewModel {
 
     func fetchWeather(city: String) async throws {
 
-        defer { isLoading = false }
+        fetchGeneration += 1
+        let generation = fetchGeneration
+        defer {
+            if generation == fetchGeneration { isLoading = false }
+        }
 
-        weather = try await weatherRepository.getWeather(for: city)
+        let result = try await weatherRepository.getWeather(for: city)
+        try _Concurrency.Task.checkCancellation()
+        guard generation == fetchGeneration else { return }
+        weather = result
 
         let sharedWeather = SharedWeatherData(
             currentTemp: weather.currentTemp,

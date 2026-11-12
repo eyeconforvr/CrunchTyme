@@ -17,6 +17,10 @@ protocol WeatherRepositoryProtocol
     func getWeather(for city: String) async throws -> WeatherModel
 }
 
+protocol WeatherLocationNameResolving {
+    func locationName(latitude: Double, longitude: Double) async throws -> String?
+}
+
 //protocol Greeter {
 //    func greet(name: String) -> String
 //}

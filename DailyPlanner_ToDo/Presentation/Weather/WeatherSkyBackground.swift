@@ -14,10 +14,7 @@ struct WeatherSkyBackground: View {
 
     var body: some View {
         ZStack {
-            // WeatherAppearance gradients fade to .clear, which lets the
-            // host background show through and makes the sky look like it
-            // stops early. An opaque base makes the layer fill its whole
-            // frame, so it starts and ends exactly where the container does.
+       
             Color(uiColor: .systemBackground)
 
             WeatherAppearance.background(

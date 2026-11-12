@@ -1,7 +1,7 @@
 import Foundation
 
-/// Keeps provider codes out of the presentation layer. Descriptions match the
-/// existing WeatherAppearance/SunCycleView string conventions.
+/// Keeps provider codes out of the presentation layer.
+
 enum WeatherConditionMapper {
     struct Condition {
         let description: String

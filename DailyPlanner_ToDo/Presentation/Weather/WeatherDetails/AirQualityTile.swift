@@ -12,10 +12,11 @@ struct AirQualityTile: View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: "aqi.medium")
                 .font(.title2)
+                .foregroundStyle(Color("Button"))
 
             Text("Air Quality")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("Text").opacity(0.6))
 
             Text("Good")
                 .font(.headline)
@@ -23,10 +24,15 @@ struct AirQualityTile: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 120)
         .padding()
-        .background(.thinMaterial)
+        .foregroundStyle(Color("Text"))
+        .background(Color("Container"))
         .clipShape(
             RoundedRectangle(cornerRadius: 18)
         )
+        .overlay {
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color(Color.gray), lineWidth: 1)
+        }
     }
 }
 

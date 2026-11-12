@@ -24,17 +24,23 @@ struct ForecastCard: View {
 
             Image(systemName: icon)
                 .font(.title)
+                .foregroundStyle(Color("Button"))
 
             Text(highTemp)
                 .font(.headline)
 
             Text(lowTemp)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("Text").opacity(0.6))
         }
         .frame(width: 75, height: 105)
-        .background(.thinMaterial)
+        .foregroundStyle(Color("Text"))
+        .background(Color("Container"))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(Color.gray), lineWidth: 1)
+        }
     }
 }
 
