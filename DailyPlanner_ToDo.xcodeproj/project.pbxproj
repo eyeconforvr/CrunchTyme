@@ -597,6 +597,7 @@
 				CODE_SIGN_ENTITLEMENTS = DailyPlanner_ToDo/DailyPlanner_ToDo.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UK59U3Z6XN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "DailyPlanner-ToDo-Info.plist";
@@ -632,6 +633,7 @@
 				CODE_SIGN_ENTITLEMENTS = DailyPlanner_ToDo/DailyPlanner_ToDo.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UK59U3Z6XN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "DailyPlanner-ToDo-Info.plist";

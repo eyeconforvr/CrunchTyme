@@ -23,6 +23,6 @@ struct DailyPlanner_ToDoApp: App {
                 }
             }
             .environment(locationService)   
-        }
+        }.modelContainer(for: Task.self)
     }
 }
