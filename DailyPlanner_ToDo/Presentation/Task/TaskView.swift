@@ -141,8 +141,6 @@ struct TaskView: View {
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $isSheetPresented) {
                 AddTaskView()
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
             }
         }
     }

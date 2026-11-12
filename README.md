@@ -64,11 +64,11 @@ Home greets you by name and time of day, shows the current date and weather summ
 
 ### Task creation and local persistence
 
-The plus button on Home or Calendar opens a task sheet. Enter a title, description, and due date/time, then save. The date picker permits dates from the present onward. Tasks store an identifier, title, description, completion state, and due date in the app's SwiftData model container.
+The plus button on Home or Calendar opens a task sheet. Enter a title, description, and due date/time, then save. For new tasks, the date picker permits dates from the present onward. Editing supports existing overdue dates. Tasks store an identifier, title, description, completion state, and due date in the app's SwiftData model container.
 
 **Technologies and patterns:** SwiftUI sheet presentation, `DatePicker`, SwiftData `@Model` and `ModelContext`, and task creation through `TaskViewModel`.
 
-**Current scope:** the view model contains update and delete methods, but the visible interface does not expose editing or deletion. The form currently allows empty titles and logs save failures to the debug console.
+The shared task sheet preserves the original centered heading, GroupBox fields, and plain Save button, with consistent adaptive presentation from Home and Calendar. It opens at medium height and expands when a field is focused. Fields scroll and Save stays pinned above the keyboard; use the keyboard’s Done control or drag the form to dismiss the keyboard. A task name is required: blank or whitespace-only names cannot be saved. Descriptions remain optional. Persistence failures keep the form open and show an error.
 
 **Demo:** Create a task, find it on Home and Calendar, then relaunch to demonstrate persistence.
 
@@ -84,9 +84,9 @@ Browse horizontally paged, Monday-first weeks and select a day to see its tasks 
 
 **Technologies and patterns:** generic `CalendarView<Task: CalendarTask>`, a protocol adapter on the persisted task model, observable `CalendarViewModel`, Foundation calendar calculations, and SwiftUI scroll paging.
 
-**Current scope:** the header's back button has an empty action. Changing the selected date currently prints task/date diagnostics to the console.
+Swipe left on a task to reveal Delete, or complete the swipe to delete it. Double-tap a task to edit its name, description, or due date in the shared task sheet. Editing preserves its completion status; changing its due date moves it to the corresponding calendar day. A long-press menu and accessibility actions also offer Edit and Delete. The header's back button still has an empty action.
 
-**Demo:** Page through weeks, select days with and without tasks, and show a scheduled day's timeline.
+**Demo:** Page through weeks, select days with and without tasks, double-tap a task to edit it, and swipe a task to delete it.
 
 <!-- TODO: add demo video for Calendar Timeline -->
 [▶ Watch the Calendar Timeline demo](docs/videos/calendar-timeline.mp4)
@@ -192,9 +192,9 @@ DailyPlanner_ToDo/
 └── ToDoApp/.gitattributes            # Line-ending configuration only
 ```
 
-**App lifecycle:** `DailyPlanner_ToDoApp` supplies the task model container and location service, then chooses onboarding or `RootTabView` using the stored onboarding flag. The root owns a weather view model shared by Home and Weather and loads weather when location authorization changes.
+**App lifecycle:** `DailyPlanner_ToDoApp` supplies the task model container and location service, then chooses onboarding or `RootTabView` using the stored onboarding flag. The root owns a weather view model shared by Home and Weather and loads weather when location authorization changes. Root requests device coordinates first; if a refresh fails, already supplied device coordinates remain usable. Sandton is used only when location permission or coordinates are unavailable. Cancelled or older weather loads cannot overwrite a newer result or its widget snapshot.
 
-**Weather flow:** view → `WeatherViewModel` → `WeatherRepositoryProtocol` → `WeatherServiceProtocol` → Open-Meteo. `WeatherMapper`, called by the repository, converts provider-specific DTOs into the existing application models. `WeatherConditionMapper` groups WMO codes into the condition strings and SF Symbols already consumed by the views. Optional measurements use °C, %, mm, and km/h. Forecast dates are decoded as Unix timestamps and formatted in the returned location timezone. After a successful fetch, the view model saves `SharedWeatherData` and asks WidgetKit to reload.
+**Weather flow:** view → `WeatherViewModel` → `WeatherRepositoryProtocol` → `WeatherServiceProtocol` → Open-Meteo. For device-coordinate queries, an injected MapKit reverse-geocoding resolver supplies the city name to the existing weather model and widget snapshot. A failed name lookup keeps local weather with a “Current location” label; it does not switch coordinates to Sandton. `WeatherMapper`, called by the repository, converts provider-specific DTOs into the existing application models. `WeatherConditionMapper` groups WMO codes into the condition strings and SF Symbols already consumed by the views. Optional measurements use °C, %, mm, and km/h. Forecast dates are decoded as Unix timestamps and formatted in the returned location timezone. After a successful fetch, the view model saves `SharedWeatherData` and asks WidgetKit to reload.
 
 **Task flow:** `AddTaskView` → `TaskViewModel` → SwiftData `ModelContext`. Queries supply tasks to Home and Calendar; `FilterUseCase` selects categories, while `CalendarViewModel` filters and sorts by day.
 
@@ -249,7 +249,7 @@ Tasks and onboarding preferences use local storage, so task planning does not de
 
 ## Testing
 
-`DailyPlanner_ToDoTests` includes the original weather mock smoke test and `OpenMeteoWeatherTests`. Deterministic tests use a stub `URLProtocol` to verify city/coordinate requests, HTTP/decoding/network failures, WMO mappings, optional forecast values, timezone formatting, repository output, view-model state, and App Group snapshot compatibility. They do not require a live API connection. Task persistence, task filters, calendar behavior, and widget visual layouts still need dedicated coverage.
+`DailyPlanner_ToDoTests` includes the original weather mock smoke test and `OpenMeteoWeatherTests`. Deterministic tests use a stub `URLProtocol` to verify city/coordinate requests, HTTP/decoding/network failures, WMO mappings, optional forecast values, timezone formatting, repository output, view-model state, and App Group snapshot compatibility. They do not require a live API connection. `TaskEditingTests` uses in-memory SwiftData stores to cover blank-name rejection, trimmed task creation, persistent edits/deletion, preservation of completion and identity, and moving edited tasks between calendar days. Task filters, calendar paging, and widget visual layouts still need dedicated coverage.
 
 In Xcode, select **DailyPlanner_ToDo** or **DailyPlanner_ToDoTests** and use **⌘U**. The dedicated test scheme references `DailyPlanner_ToDo/DailyPlanner_ToDoTests.xctestplan`.
 
@@ -271,7 +271,7 @@ xcodebuild test \
 
 No CI workflow, dedicated UI test target, or lint configuration is included.
 
-<!-- TODO: add tests for task filters/persistence, calendar date boundaries, and widget visual layouts. -->
+<!-- TODO: add tests for task filters, calendar paging/date boundaries, and widget visual layouts. -->
 
 ## Deployment
 
@@ -296,8 +296,8 @@ These items reflect current implementation gaps, not committed release dates.
 - [x] Connect humidity to current weather data.
 - [ ] Connect air-quality tiles to real data, or label unavailable data.
 - [ ] Add visible weather errors and retry controls.
-- [ ] Expose task editing/deletion; add form validation and save feedback.
-- [ ] Implement Settings; resolve the inactive calendar header action and diagnostic logging.
+- [x] Add calendar task editing/deletion, blank-name validation, and visible save feedback.
+- [ ] Implement Settings and resolve the inactive calendar header action.
 - [ ] Register and verify widget deep links across layouts and verify family support.
 - [ ] Align deployment targets, supply app icon artwork, and expand tests.
 - [ ] Add the feature videos and screenshots linked above.

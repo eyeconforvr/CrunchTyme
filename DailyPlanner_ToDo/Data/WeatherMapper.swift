@@ -32,8 +32,7 @@ struct WeatherMapper {
             guard let timestamp, timestamp.isFinite else { return nil }
             return Date(timeIntervalSince1970: timestamp)
         }
-        // Parallel arrays may be absent, short, or contain nulls. Never zip them:
-        // that would silently truncate otherwise usable forecast rows.
+
         let daily = response.daily
         let todayIndex = daily?.time.firstIndex { timestamp in
             guard let day = date(timestamp) else { return false }

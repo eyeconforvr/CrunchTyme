@@ -28,6 +28,7 @@ struct ForecastView: View {
                     .tag(ForecastMode.hourly)
             }
             .pickerStyle(.segmented)
+            .tint(Color("Button"))
 
             switch mode {
             case .daily:

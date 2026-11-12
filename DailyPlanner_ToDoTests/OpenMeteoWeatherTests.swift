@@ -128,8 +128,8 @@ final class OpenMeteoWeatherTests: XCTestCase {
             XCTAssertEqual(url.scheme, "https")
             let items = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
             let query = Dictionary(uniqueKeysWithValues: items.map { ($0.name, $0.value ?? "") })
-            XCTAssertEqual(query["latitude"], "-26.1076")
-            XCTAssertEqual(query["longitude"], "28.0567")
+            XCTAssertEqual(query["latitude"], "-33.9249")
+            XCTAssertEqual(query["longitude"], "18.4241")
             XCTAssertEqual(query["timezone"], "auto")
             XCTAssertEqual(query["timeformat"], "unixtime")
             XCTAssertEqual(query["forecast_days"], "7")
@@ -141,7 +141,7 @@ final class OpenMeteoWeatherTests: XCTestCase {
             return (200, data)
         }
         defer { session.invalidateAndCancel() }
-        let response = try await WeatherService(session: session).getWeather(for: "-26.1076,28.0567")
+        let response = try await WeatherService(session: session).getWeather(for: "-33.9249,18.4241")
         XCTAssertEqual(response.current?.temperature, 22.5)
     }
 
@@ -202,7 +202,7 @@ final class OpenMeteoWeatherTests: XCTestCase {
 
     func testRepositoryKeepsProviderDTOBehindExistingInterface() async throws {
         let service = StubService(response: try decode(fixture()))
-        let repository: WeatherRepositoryProtocol = WeatherRepository(weatherService: service)
+        let repository: WeatherRepositoryProtocol = WeatherRepository(weatherService: service, locationNameResolver: StubLocationNameResolver())
         let model = try await repository.getWeather(for: "-26.1,28.0")
         XCTAssertEqual(service.lastQuery, "-26.1,28.0")
         XCTAssertEqual(model.currentTemp, "22.5°C")
@@ -244,6 +244,122 @@ final class OpenMeteoWeatherTests: XCTestCase {
         XCTAssertEqual(snapshot.currentTemp, "20°C")
         XCTAssertNil(snapshot.locationName)
         XCTAssertNil(snapshot.sunriseDate)
+    }
+
+    func testSlowFallbackCannotOverwriteNewerDeviceWeatherOrWidgetSnapshot() async throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "group.com.alfrxdjr.DailyPlanner-ToDo"))
+        let oldData = defaults.data(forKey: "sharedWeatherData")
+        defer { defaults.set(oldData, forKey: "sharedWeatherData") }
+        let repository = PendingRepository()
+        let viewModel = WeatherViewModel(weatherRepository: repository)
+        let fallbackStarted = expectation(description: "Fallback started")
+        repository.onStart = { _ in fallbackStarted.fulfill() }
+        let fallback = _Concurrency.Task { try await viewModel.fetchWeather(city: "Sandton") }
+        await fulfillment(of: [fallbackStarted], timeout: 2)
+
+        let deviceStarted = expectation(description: "Device query started")
+        repository.onStart = { _ in deviceStarted.fulfill() }
+        let device = _Concurrency.Task { try await viewModel.fetchWeather(city: "-33.9249,18.4241") }
+        await fulfillment(of: [deviceStarted], timeout: 2)
+        repository.complete("-33.9249,18.4241", with: WeatherModel(currentTemp: "18", locationName: "Current location"))
+        try await device.value
+        repository.complete("Sandton", with: WeatherModel(currentTemp: "30", locationName: "Sandton"))
+        try await fallback.value
+
+        XCTAssertEqual(viewModel.weather.currentTemp, "18°C")
+        XCTAssertEqual(viewModel.weather.locationName, "Current location")
+        XCTAssertEqual(WeatherDataStore.load()?.locationName, "Current location")
+        XCTAssertEqual(WeatherDataStore.load()?.currentTemp, "18°C")
+        XCTAssertFalse(viewModel.isLoading)
+    }
+
+    func testCancelledLocationLoadDoesNotPublishWeather() async throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "group.com.alfrxdjr.DailyPlanner-ToDo"))
+        let oldData = defaults.data(forKey: "sharedWeatherData")
+        defer { defaults.set(oldData, forKey: "sharedWeatherData") }
+        let repository = PendingRepository()
+        let viewModel = WeatherViewModel(weatherRepository: repository)
+        let started = expectation(description: "Request started")
+        repository.onStart = { _ in started.fulfill() }
+        let request = _Concurrency.Task { try await viewModel.fetchWeather(city: "Sandton") }
+        await fulfillment(of: [started], timeout: 2)
+        request.cancel()
+        repository.complete("Sandton", with: WeatherModel(currentTemp: "30", locationName: "Sandton"))
+        do {
+            try await request.value
+            XCTFail("Expected cancellation")
+        } catch is CancellationError { }
+        XCTAssertEqual(viewModel.weather.locationName, "")
+        XCTAssertEqual(defaults.data(forKey: "sharedWeatherData"), oldData)
+    }
+
+    func testResolvedDeviceNameReachesTrayModelAndWidgetSnapshot() async throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "group.com.alfrxdjr.DailyPlanner-ToDo"))
+        let oldData = defaults.data(forKey: "sharedWeatherData")
+        defer { defaults.set(oldData, forKey: "sharedWeatherData") }
+        let service = StubService(response: try decode(fixture()))
+        let resolver = StubLocationNameResolver(name: " Cape Town ")
+        let viewModel = WeatherViewModel(weatherRepository: WeatherRepository(
+            weatherService: service, locationNameResolver: resolver
+        ))
+        try await viewModel.fetchWeather(city: "-33.9249,18.4241")
+        XCTAssertEqual(service.lastQuery, "-33.9249,18.4241")
+        XCTAssertEqual(resolver.latitude, -33.9249)
+        XCTAssertEqual(resolver.longitude, 18.4241)
+        XCTAssertEqual(viewModel.weather.locationName, "Cape Town")
+        XCTAssertEqual(WeatherDataStore.load()?.locationName, "Cape Town")
+    }
+
+    func testPlaceNameLookupFailureKeepsDeviceWeatherWithoutUsingSandton() async throws {
+        let service = StubService(response: try decode(fixture()))
+        let resolver = StubLocationNameResolver()
+        resolver.error = URLError(.notConnectedToInternet)
+        let repository = WeatherRepository(weatherService: service, locationNameResolver: resolver)
+        let weather = try await repository.getWeather(for: "-33.9249,18.4241")
+        XCTAssertEqual(weather.currentTemp, "22.5°C")
+        XCTAssertEqual(weather.locationName, "Current location")
+        XCTAssertEqual(service.lastQuery, "-33.9249,18.4241")
+    }
+
+    func testFallbackCityNameDoesNotRequireReverseGeocoding() async throws {
+        let service = StubService(response: try decode(fixture()))
+        let resolver = StubLocationNameResolver(name: "Should not be used")
+        let weather = try await WeatherRepository(weatherService: service, locationNameResolver: resolver)
+            .getWeather(for: "Sandton")
+        XCTAssertEqual(weather.locationName, "Sandton")
+        XCTAssertNil(resolver.latitude)
+    }
+
+    private final class StubLocationNameResolver: WeatherLocationNameResolving {
+        let name: String?
+        var error: Error?
+        var latitude: Double?
+        var longitude: Double?
+
+        init(name: String? = nil) { self.name = name }
+
+        func locationName(latitude: Double, longitude: Double) async throws -> String? {
+            self.latitude = latitude
+            self.longitude = longitude
+            if let error { throw error }
+            return name
+        }
+    }
+
+    private final class PendingRepository: WeatherRepositoryProtocol {
+        var onStart: ((String) -> Void)?
+        private var pending: [String: CheckedContinuation<WeatherModel, Error>] = [:]
+
+        func getWeather(for city: String) async throws -> WeatherModel {
+            try await withCheckedThrowingContinuation { continuation in
+                pending[city] = continuation
+                onStart?(city)
+            }
+        }
+
+        func complete(_ query: String, with model: WeatherModel) {
+            pending.removeValue(forKey: query)?.resume(returning: model)
+        }
     }
 
     private final class StubRepository: WeatherRepositoryProtocol {

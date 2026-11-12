@@ -36,12 +36,12 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         authorizationStatus == .denied || authorizationStatus == .restricted
     }
 
-    /// "lat,lon" string, e.g. "-26.1076,28.0567". Many weather APIs accept
-    /// this directly as the query. nil until a location has been fetched.
+
     var coordinateQuery: String? {
         guard let coordinate = lastLocation?.coordinate else { return nil }
         return String(
             format: "%.4f,%.4f",
+            locale: Locale(identifier: "en_US_POSIX"),
             coordinate.latitude,
             coordinate.longitude
         )
@@ -59,15 +59,14 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     override init() {
         super.init()
         manager.delegate = self
-        // City-level accuracy is plenty for weather and is faster and
-        // more battery friendly than GPS-level accuracy.
+
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
-        authorizationStatus = manager.authorizationStatus
+
     }
 
     // MARK: - Public API
 
-    /// Shows the system permission prompt (only the first time).
+
     func requestPermission() {
         #if DEBUG
         if Bundle.main.object(
@@ -81,8 +80,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         manager.requestWhenInUseAuthorization()
     }
 
-    /// One-shot fetch of the current location.
-    /// Throws LocationError.notAuthorized if permission hasn't been given.
+
     @discardableResult
     func requestLocation() async throws -> CLLocation {
         guard isGranted else { throw LocationError.notAuthorized }

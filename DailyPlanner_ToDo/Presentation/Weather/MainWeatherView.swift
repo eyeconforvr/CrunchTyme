@@ -29,6 +29,7 @@ struct MainWeatherScreen: View {
             }
             .padding(.horizontal, 10)
         }
+        .background(Color("Background").ignoresSafeArea())
     }
 }
 

@@ -13,10 +13,11 @@ struct HumidityTile: View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: "humidity")
                 .font(.title2)
+                .foregroundStyle(Color("Button"))
 
             Text("Humidity")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("Text").opacity(0.6))
 
             Text(humidity.map { String(format: "%.0f%%", $0) } ?? "--")
                 .font(.headline)
@@ -24,10 +25,15 @@ struct HumidityTile: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 120)
         .padding()
-        .background(.thinMaterial)
+        .foregroundStyle(Color("Text"))
+        .background(Color("Container"))
         .clipShape(
             RoundedRectangle(cornerRadius: 18)
         )
+        .overlay {
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color(Color.gray), lineWidth: 1)
+        }
     }
 }
 

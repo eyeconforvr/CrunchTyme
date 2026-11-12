@@ -42,12 +42,16 @@ enum Theme {
 struct CalendarView<Task: CalendarTask>: View {
 
     let tasks: [Task]
+    var onDelete: ((Task) throws -> Void)? = nil
+    var onEdit: ((Task) -> Void)? = nil
     @State private var viewModel = CalendarViewModel<Task>()
     @State private var scrolledWeekID: Date?
     @State private var isSheetPresented = false
+    @State private var deletionError: String?
+    @ScaledMetric(relativeTo: .body) private var weekStripHeight: CGFloat = 80
 
     var body: some View {
-        ScrollView {
+        List {
             VStack(alignment: .leading, spacing: 0) {
                 header
                     .padding(.bottom, 22)
@@ -59,22 +63,27 @@ struct CalendarView<Task: CalendarTask>: View {
 
                 weekStrip
                     .padding(.bottom, 26)
+            }
+            .listRowInsets(EdgeInsets(top: 12, leading: 20, bottom: 0, trailing: 20))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
 
-                timeline
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 24)
+            timeline
         }
+        .listStyle(.plain)
+        .listRowSpacing(16)
+        .scrollContentBackground(.hidden)
         .background(Theme.appBackground.ignoresSafeArea())
-        .onChange(of: viewModel.selectedDate) { _, newValue in
-            // TEMPORARY — remove once the mismatch is found.
-            print("Selected date: \(newValue)")
-            let matches = viewModel.tasksForSelectedDay(from: tasks)
-            print("Matching tasks: \(matches.count)")
-            for task in tasks {
-                print("  task \(task.title): due \(task.date), sameDay? \(Calendar.current.isDate(task.date, inSameDayAs: newValue))")
-            }
+        .sheet(isPresented: $isSheetPresented) {
+            AddTaskView(initialDate: viewModel.selectedDate)
+        }
+        .alert("Couldn't delete task", isPresented: Binding(
+            get: { deletionError != nil },
+            set: { if !$0 { deletionError = nil } }
+        )) {
+            Button("OK", role: .cancel) { deletionError = nil }
+        } message: {
+            Text(deletionError ?? "Please try again.")
         }
     }
 
@@ -117,11 +126,7 @@ struct CalendarView<Task: CalendarTask>: View {
                     y: 8
                 )
             }
-            .sheet(isPresented: $isSheetPresented) {
-                AddTaskView()
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
-            }
+            .accessibilityLabel("Add a task")
         }
     }
 
@@ -138,6 +143,7 @@ struct CalendarView<Task: CalendarTask>: View {
             }
             .scrollTargetLayout()
         }
+        .frame(height: weekStripHeight)
         .scrollTargetBehavior(.paging)
         .scrollPosition(id: $scrolledWeekID)
         .onChange(of: scrolledWeekID) { _, newValue in
@@ -202,34 +208,68 @@ struct CalendarView<Task: CalendarTask>: View {
 
     // MARK: Timeline
 
+    @ViewBuilder
     private var timeline: some View {
         let dayTasks = viewModel.tasksForSelectedDay(from: tasks)
         let currentID = viewModel.currentTaskID(from: tasks)
 
-        return Group {
-            if dayTasks.isEmpty {
-                emptyState
-            } else {
-                ZStack(alignment: .leading) {
+        if dayTasks.isEmpty {
+            emptyState
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+        } else {
+            ForEach(Array(dayTasks.enumerated()), id: \.element.id) { index, task in
+                TimelineRow(
+                    title: task.title,
+                    time: viewModel.timeLabel(for: task.date),
+                    description: task.notes,
+                    colorSet: .forIndex(index),
+                    isCurrent: task.id == currentID
+                )
+                .background(alignment: .leading) {
                     Rectangle()
                         .fill(Theme.line)
                         .frame(width: 2)
-                        .padding(.vertical, 10)
                         .padding(.leading, 7)
-
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(Array(dayTasks.enumerated()), id: \.element.id) { index, task in
-                            TimelineRow(
-                                title: task.title,
-                                time: viewModel.timeLabel(for: task.date),
-                                description: task.notes,
-                                colorSet: .forIndex(index),
-                                isCurrent: task.id == currentID
-                            )
-                        }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture(count: 2) { onEdit?(task) }
+                .accessibilityElement(children: .combine)
+                .accessibilityHint(onEdit == nil ? "" : "Double tap to edit task details")
+                .accessibilityAction { onEdit?(task) }
+                .accessibilityActions {
+                    if let onEdit {
+                        Button("Edit task") { onEdit(task) }
+                    }
+                    if onDelete != nil {
+                        Button("Delete task", role: .destructive) { delete(task) }
                     }
                 }
+                .contextMenu {
+                    if let onEdit {
+                        Button("Edit task", systemImage: "pencil") { onEdit(task) }
+                    }
+                    if onDelete != nil {
+                        Button("Delete task", systemImage: "trash", role: .destructive) { delete(task) }
+                    }
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    if onDelete != nil {
+                        Button("Delete", systemImage: "trash", role: .destructive) { delete(task) }
+                    }
+                }
+                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
+        }
+    }
+
+    private func delete(_ task: Task) {
+        do {
+            try onDelete?(task)
+        } catch {
+            deletionError = error.localizedDescription
         }
     }
 
