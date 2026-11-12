@@ -37,12 +37,8 @@ struct CurrentWeatherHero: View {
 
             // MARK: - Sun Cycle
 
-            if let sunrise = WeatherTimeParser.date(
-                from: viewModel.weather.sunrise
-            ),
-            let sunset = WeatherTimeParser.date(
-                from: viewModel.weather.sunset
-            ) {
+            if let sunrise = viewModel.weather.sunriseDate,
+               let sunset = viewModel.weather.sunsetDate {
 
                 SunCycleView(
                     sunrise: sunrise,

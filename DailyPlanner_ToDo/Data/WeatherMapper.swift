@@ -1,122 +1,118 @@
-//
-//  WeatherMapper.swift
-//  DailyPlanner_ToDo
-//
-//  Created by AJ Mhlanga on 2026/07/17.
-//
-
 import Foundation
 
-// TODO: GET SPECIFIC FORECAST FOR DAY
-// TODO: CREATE AN ENUM THAT HAS ALL WEATHER CONDITIONS, USE ENUM TO DO SWITCH CASE FOR ICONS
-
+/// The repository uses this mapper to keep Open-Meteo DTOs out of the UI.
 struct WeatherMapper {
+    static func map(
+        from response: OpenMeteoWeatherResponse,
+        locationName: String = "",
+        now: Date = Date()
+    ) throws -> WeatherModel {
+        guard let current = response.current,
+              let temperature = current.temperature, temperature.isFinite else {
+            throw WeatherServiceError.unavailable
+        }
+        let zone = TimeZone(identifier: response.timezone)
+            ?? TimeZone(secondsFromGMT: response.utcOffsetSeconds)
+            ?? TimeZone(secondsFromGMT: 0)
+            ?? .current
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = zone
+        let startHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
+        let endHour = startHour.addingTimeInterval(24 * 60 * 60)
 
-    private static let icons: [String: String] = [
-        "Sunny": "sun.max.fill",
-        "Clear": "moon.stars.fill",
-        "Partly cloudy": "cloud.sun.fill",
-        "Cloudy": "cloud.fill",
-        "Overcast": "smoke.fill",
-        "Mist": "cloud.fog.fill",
-        "Fog": "cloud.fog.fill",
-        "Freezing fog": "cloud.fog.fill",
-        "Light rain": "cloud.rain.fill",
-        "Moderate rain": "cloud.rain.fill",
-        "Heavy rain": "cloud.heavyrain.fill",
-        "Light drizzle": "cloud.drizzle.fill",
-        "Light snow": "cloud.snow.fill",
-        "Moderate snow": "snow",
-        "Heavy snow": "snowflake",
-        "Blizzard": "wind.snow"
-    ]
+        func format(_ date: Date, _ pattern: String) -> String {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.calendar = calendar
+            formatter.timeZone = zone
+            formatter.dateFormat = pattern
+            return formatter.string(from: date)
+        }
+        func date(_ timestamp: TimeInterval?) -> Date? {
+            guard let timestamp, timestamp.isFinite else { return nil }
+            return Date(timeIntervalSince1970: timestamp)
+        }
+        // Parallel arrays may be absent, short, or contain nulls. Never zip them:
+        // that would silently truncate otherwise usable forecast rows.
+        let daily = response.daily
+        let todayIndex = daily?.time.firstIndex { timestamp in
+            guard let day = date(timestamp) else { return false }
+            return calendar.isDate(day, inSameDayAs: now)
+        }
+        let sunrise = todayIndex.flatMap { date(value(daily?.sunrise, at: $0)) }
+        let sunset = todayIndex.flatMap { date(value(daily?.sunset, at: $0)) }
+        let isDay = current.isDay.map { $0 == 1 }
+            ?? sunrise.flatMap { rise in sunset.map { now >= rise && now < $0 } }
+            ?? false
+        let condition = WeatherConditionMapper.map(code: current.weatherCode, isDay: isDay)
 
-    static func map(from: WeatherResponse) -> WeatherModel {
-
-        let dailyForecast = from.forecast.forecastday.map { forecastDay in
-
-            DailyForecastModel(
-                day: WeatherTimeParser.dayOfWeek(from: forecastDay.date),
-                highTemp: String(forecastDay.day.maxtempC),
-                lowTemp: String(forecastDay.day.mintempC),
-                icon: createIcon(
-                    condition: forecastDay.day.condition.text
-                ),
-                condition: forecastDay.day.condition.text
+        let dailyForecast = (daily?.time ?? []).enumerated().compactMap { index, timestamp -> DailyForecastModel? in
+            guard let day = date(timestamp) else { return nil }
+            let condition = WeatherConditionMapper.map(code: value(daily?.weatherCode, at: index), isDay: true)
+            return DailyForecastModel(
+                day: format(day, "EEEE"),
+                highTemp: temperatureText(value(daily?.highTemperature, at: index)),
+                lowTemp: temperatureText(value(daily?.lowTemperature, at: index)),
+                icon: condition.icon,
+                condition: condition.description
             )
         }
-
-        let calendar = Calendar.current
-
-        let currentHour = calendar.date(
-            bySettingHour: calendar.component(.hour, from: Date()),
-            minute: 0,
-            second: 0,
-            of: Date()
-        )!
-
-        let twentyFourHoursLater = calendar.date(
-            byAdding: .hour,
-            value: 24,
-            to: currentHour
-        )!
-
-        let hourlyForecast = from.forecast.forecastday
-            .flatMap { forecastDay in
-
-                forecastDay.hour
-                    .filter { hour in
-
-                        guard let hourDate = WeatherTimeParser.parseHour(
-                            from: hour.time
-                        ) else {
-                            return false
-                        }
-
-                        return hourDate >= currentHour &&
-                               hourDate < twentyFourHoursLater
-                    }
-            }
-            .enumerated()
-            .map { index, hour in
-
-                HourlyForecastModel(
-                    time: index == 0
-                        ? "Now"
-                        : WeatherTimeParser.formatHour(
-                            from: hour.time
-                        ),
-                    highTemp: String(hour.tempC),
-                    lowTemp: String(hour.tempC),
-                    icon: createIcon(
-                        condition: hour.condition.text
-                    ),
-                    condition: hour.condition.text
-                )
-            }
-
+        let hourly = response.hourly
+        let hourlyForecast = (hourly?.time ?? []).enumerated().compactMap { index, timestamp -> HourlyForecastModel? in
+            guard let hour = date(timestamp), hour >= startHour, hour < endHour else { return nil }
+            let condition = WeatherConditionMapper.map(code: value(hourly?.weatherCode, at: index),
+                                                       isDay: value(hourly?.isDay, at: index) == 1)
+            let temp = temperatureText(value(hourly?.temperature, at: index))
+            return HourlyForecastModel(
+                metrics: WeatherMetrics(
+                    feelsLikeTemperature: finite(value(hourly?.apparentTemperature, at: index)),
+                    humidity: finite(value(hourly?.humidity, at: index)),
+                    precipitation: finite(value(hourly?.precipitation, at: index)),
+                    windSpeed: finite(value(hourly?.windSpeed, at: index))
+                ),
+                time: hour == startHour ? "Now" : format(hour, "h a"),
+                highTemp: temp, lowTemp: temp,
+                icon: condition.icon, condition: condition.description
+            )
+        }
         return WeatherModel(
-            sunrise: from.forecast.forecastday.first?.astro.sunrise ?? "",
-            sunset: from.forecast.forecastday.first?.astro.sunset ?? "",
-            currentTemp: String(from.current.tempC),
-            highTemp: String(
-                from.forecast.forecastday.first?.day.maxtempC ?? 0.0
-            ),
-            lowTemp: String(
-                from.forecast.forecastday.first?.day.mintempC ?? 0.0
-            ),
-            icon: createIcon(
-                condition: from.current.condition.text
-            ),
-            condition: from.current.condition.text,
-            isDay: (from.current.isDay != 0),
+            sunrise: sunrise.map { format($0, "hh:mm a") } ?? "--",
+            sunset: sunset.map { format($0, "hh:mm a") } ?? "--",
+            currentTemp: number(temperature),
+            highTemp: number(todayIndex.flatMap { value(daily?.highTemperature, at: $0) }),
+            lowTemp: number(todayIndex.flatMap { value(daily?.lowTemperature, at: $0) }),
+            icon: condition.icon,
+            condition: condition.description,
+            isDay: isDay,
             dailyForecast: dailyForecast,
-            hourlyForecast: hourlyForecast
+            hourlyForecast: hourlyForecast,
+            metrics: WeatherMetrics(feelsLikeTemperature: finite(current.apparentTemperature),
+                                    humidity: finite(current.humidity),
+                                    precipitation: finite(current.precipitation),
+                                    windSpeed: finite(current.windSpeed)),
+            locationName: locationName,
+            timeZoneIdentifier: zone.identifier,
+            sunriseDate: sunrise,
+            sunsetDate: sunset
         )
     }
 
-    private static func createIcon(condition: String) -> String {
-        icons[condition] ?? "cloud"
+    private static func value<T>(_ values: [T?]?, at index: Int) -> T? {
+        guard let values, values.indices.contains(index) else { return nil }
+        return values[index]
+    }
+
+    private static func finite(_ value: Double?) -> Double? {
+        guard let value, value.isFinite else { return nil }
+        return value
+    }
+
+    private static func number(_ value: Double?) -> String {
+        guard let value = finite(value) else { return "--" }
+        return String(format: "%.1f", locale: Locale(identifier: "en_US_POSIX"), value)
+    }
+
+    private static func temperatureText(_ value: Double?) -> String {
+        number(value) + "°C"
     }
 }
-

@@ -19,11 +19,7 @@ class WeatherViewModel {
     }
 
     var weather: WeatherModel = WeatherModel()
-
-    /// True until the first fetch finishes (success or failure). Starts
-    /// true so the skeleton shows while the location and weather load.
-    /// Later refreshes keep showing the existing data instead of
-    /// flashing the skeleton again.
+    
     var isLoading = true
 
     func fetchWeather(city: String) async throws {
@@ -48,7 +44,11 @@ class WeatherViewModel {
                     icon: forecast.icon,
                     condition: forecast.condition
                 )
-            }
+            },
+            locationName: weather.locationName,
+            timeZoneIdentifier: weather.timeZoneIdentifier,
+            sunriseDate: weather.sunriseDate,
+            sunsetDate: weather.sunsetDate
         )
         WeatherDataStore.save(sharedWeather)
 

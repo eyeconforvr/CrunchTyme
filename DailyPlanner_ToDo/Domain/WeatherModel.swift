@@ -7,6 +7,14 @@
 
 import Foundation
 
+/// Provider-independent measurements. Units: °C, %, mm, and km/h.
+struct WeatherMetrics {
+    var feelsLikeTemperature: Double?
+    var humidity: Double?
+    var precipitation: Double?
+    var windSpeed: Double?
+}
+
 struct DailyForecastModel {
 
     let day: String
@@ -18,6 +26,8 @@ struct DailyForecastModel {
 
 struct HourlyForecastModel {
 
+    var metrics = WeatherMetrics()
+
     let time: String
     let highTemp: String
     let lowTemp: String
@@ -26,6 +36,12 @@ struct HourlyForecastModel {
 }
 
 struct WeatherModel {
+
+    let metrics: WeatherMetrics
+    let locationName: String
+    let timeZoneIdentifier: String?
+    let sunriseDate: Date?
+    let sunsetDate: Date?
 
     let sunrise: String
     let sunset: String
@@ -48,9 +64,19 @@ struct WeatherModel {
         condition: String = "",
         isDay: Bool = true,
         dailyForecast: [DailyForecastModel] = [],
-        hourlyForecast: [HourlyForecastModel] = []
+        hourlyForecast: [HourlyForecastModel] = [],
+        metrics: WeatherMetrics = WeatherMetrics(),
+        locationName: String = "",
+        timeZoneIdentifier: String? = nil,
+        sunriseDate: Date? = nil,
+        sunsetDate: Date? = nil
     ) {
 
+        self.metrics = metrics
+        self.locationName = locationName
+        self.timeZoneIdentifier = timeZoneIdentifier
+        self.sunriseDate = sunriseDate
+        self.sunsetDate = sunsetDate
         self.sunrise = sunrise
         self.sunset = sunset
         self.currentTemp = currentTemp + "°C"

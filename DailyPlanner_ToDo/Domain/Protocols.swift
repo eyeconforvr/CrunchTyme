@@ -9,7 +9,7 @@ import Foundation
 
 
 protocol WeatherServiceProtocol {
-    func getWeather(for city: String) async throws -> WeatherResponse
+    func getWeather(for city: String) async throws -> OpenMeteoWeatherResponse
 }
 
 protocol WeatherRepositoryProtocol
