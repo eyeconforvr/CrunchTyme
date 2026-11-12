@@ -40,6 +40,11 @@ A five-step flow introduces the app, collects a first name, offers location perm
 
 <!-- TODO: add screenshot for Onboarding -->
 ![Onboarding screenshot](docs/images/onboarding-1.png)
+![Onboarding screenshot](docs/images/onboarding-2.png)
+![Onboarding screenshot](docs/images/onboarding-3.png)
+![Onboarding screenshot](docs/images/onboarding-4.png)
+![Onboarding screenshot](docs/images/onboarding-5.png)
+![Onboarding screenshot](docs/images/onboarding-6.png)
 
 ### Home dashboard and task tracking
 
